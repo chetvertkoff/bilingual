@@ -1,0 +1,77 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "rules": {
+    "max-len": ["error", 120, 2],
+    "semi": ["error", "never"],
+    "camelcase": [0],
+    "no-tabs": 0,
+    "linebreak-style": [0, "unix"],
+    "for-direction": 0,
+    "prettier/prettier": "warn",
+    "getter-return": 0,
+    "no-buffer-constructor": 0,
+    "lines-between-class-members": 0,
+    "import/no-extraneous-dependencies": 0,
+    "@typescript-eslint/camelcase": 0,
+    "@typescript-eslint/no-explicit-any": 0,
+    "import/prefer-default-export": 0,
+    "@typescript-eslint/prefer-interface": 0,
+    "consistent-return": 0,
+    "import/extensions": 0,
+    "@typescript-eslint/no-var-requires": 0,
+    "no-extend-native": 0,
+    "no-use-before-define": 0,
+    "@typescript-eslint/no-use-before-define": ["error", { "functions": false, "classes": false }],
+    "spaced-comment": [ "error", "always", {
+      "line": {
+        "markers": ["#region", "#endregion", "region", "endregion"]
+      }
+    }],
+
+    // Remove some lines bellow when work on eslint config next time
+    "@typescript-eslint/explicit-module-boundary-types": 0,
+    "@typescript-eslint/ban-types": 0,
+    "react/require-default-props": 0,
+    "no-shadow": 0,
+    "@typescript-eslint/ban-ts-comment": 0,
+    "arrow-body-style": 0,
+    "@typescript-eslint/no-empty-function": 0,
+    "@typescript-eslint/no-namespace": 0,
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "args": "after-used",
+        "ignoreRestSiblings": true,
+      }
+    ],
+    "no-param-reassign": 0,
+  },
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true,
+    "jest": true
+  },
+  "globals": {
+    "__BASE_URL__": true,
+    "expect": true
+  },
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "parserOptions": {
+    "sourceType": "module",
+    "project": "./tsconfig.json",
+    "tsconfigRootDir": ".",
+    "extraFileExtensions": [".ts", ".tsx", ".js", ".jsx"],
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true,
+      "jsx": true
+    },
+    "ecmaVersion": 6
+  },
+
+  "plugins": ["@typescript-eslint", "prettier"]
+}

@@ -1,28 +1,18 @@
-import { writeFile } from "fs/promises";
-import { EPub } from 'epub2';
-import { JSDOM } from 'jsdom'
-import axios from "axios";
-import * as fs from "fs";
+// // @ts-nocheck
+// import { GetBilingualUseCase } from './modules/book/useCases/getBilingual/GetBilingualUseCase'
+// import { bookReaderService, htmlParseService, translateService } from './modules/book/services'
+//
+// const usecase = new GetBilingualUseCase(bookReaderService, htmlParseService, translateService)
+// ;(async () => {
+// 	await usecase.execute('C:\\projects\\bilingual\\upload\\book\\book.epub')
+// })()
+import 'reflect-metadata'
+import { runHTTP } from './infra/http'
+import { runDB } from './infra/db'
+import { runWS } from './infra/ws'
 
-const bookEpubPath = './book.epub';
+global.__basedir = __dirname.replace('\\src', '')
 
-
-(async () => {
-    const epub = await EPub.createAsync(bookEpubPath);
-    const id = epub.flow[5].id
-    const html = await epub.getChapterAsync(id)
-
-    // console.log(html)
-    await writeFile('./html.txt', '')
-    await writeFile('./html.txt', html)
-
-    const { window: { document } } = new JSDOM(html)
-    const pCollection = document.querySelectorAll('p')
-
-    const text = [...pCollection].reduce((prev, next) => {
-       return prev +'\n'+ next.textContent
-   }, '')
-
-    await writeFile('./text.txt', '')
-    await writeFile('./text.txt', text)
-})()
+runHTTP()
+runDB()
+runWS()

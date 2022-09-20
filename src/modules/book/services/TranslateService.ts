@@ -1,39 +1,60 @@
-const secretKey = ""
+import { HtmlParserResultDTO, ParsedChapterDTO } from './HtmlParseService'
+import { Result } from '../../../core/helpers/Result'
+import { BookChapterDTO, BookChapterElementDTO } from '../useCases/getBilingual/GetBilingualDTO'
+import axios from 'axios'
 
-const options = {
-    headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Api-Key ${secretKey}`,
-    },
-} as const;
+export interface ITranslateService {
+	execute(book: HtmlParserResultDTO[]): Promise<Result<BookChapterDTO[]>>
+}
 
-const body = {
-    "targetLanguageCode": "ru",
-    "texts": [
-        "dog",
-        "cat",
-        "THE baby was born at Whitewater Farms about nine in the morning, April 19, 1900. " +
-        "Two pure-breed calves,—one a heifer, the other a bull,—were dropped the same day at nearly the same hour."
-    ],
-    "folderId": "b1g6p2drfpmac6ddu0sf"
-} as const
+export class TranslateService implements ITranslateService {
+	public async execute(book: HtmlParserResultDTO[]): Promise<Result<BookChapterDTO[]>> {
+		try {
+			const res = await this.getBookTranslate(book)
+			return Result.ok<BookChapterDTO[]>(res)
+		} catch (e) {
+			return Result.fail<BookChapterDTO[]>(e)
+		}
+	}
 
-try {
-    // console.log('1')
-    // const {data} = await axios.post('https://translate.api.cloud.yandex.net/translate/v2/translate', body, options)
+	private getBookTranslate = async (book: HtmlParserResultDTO[]): Promise<BookChapterDTO[]> => {
+		const res: BookChapterDTO[] = []
+		for (const [i, ch] of book.entries()) {
+			console.log(i, ' of ', book.length)
+			const chapter = await this.translateChapter(ch.chapter, i, book.length)
+			res.push({ ...ch, chapter })
+		}
+		return res
+	}
 
-    // {
-    //     translations: [
-    //         { text: 'собака', detectedLanguageCode: 'en' },
-    //         { text: 'кошка', detectedLanguageCode: 'en' },
-    //         {
-    //             text: 'Ребенок родился на ферме Уайтуотер около девяти утра 19 апреля 1900 года. Два чистокровных теленка - одна телка, другой бык — были брошены в тот же день почти в один и тот же
-    //             час.',
-    //             detectedLanguageCode: 'en'
-    //         }
-    //     ]
-    // }
+	private translateSentence = async (text: string): Promise<string> => {
+		text = text.replace(/[^\w ]/gm, '')
+		try {
+			const {
+				data: { translation },
+			} = await axios.get<{ translation: string }>(`http://localhost:3000/api/v1/en/ru/${text}`)
 
-}catch (e) {
-    console.log(e)
+			return translation
+		} catch (e) {
+			console.log(text)
+			return ''
+		}
+	}
+
+	private translateChapter = async (
+		chapters: ParsedChapterDTO[],
+		ind: number,
+		total: number
+	): Promise<BookChapterElementDTO[]> => {
+		const res: BookChapterElementDTO[] = []
+		for (const [i, ch] of chapters.entries()) {
+			console.log(ind, '_', i, ' of ', total)
+			res.push({
+				...ch,
+				translate: await this.translateSentence(ch.originalText),
+				translateDict: {},
+			})
+		}
+		return res
+	}
 }
