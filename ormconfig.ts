@@ -1,7 +1,7 @@
-import { DataSource } from 'typeorm'
-import { entities } from './entity/entities'
+import { entities } from './src/infra/db/entity/entities'
+import { DataSourceOptions } from 'typeorm/data-source/DataSourceOptions'
 
-export const AppDataSource = new DataSource({
+export default {
 	type: 'postgres',
 	host: 'localhost',
 	port: 5432,
@@ -17,6 +17,4 @@ export const AppDataSource = new DataSource({
 	// @ts-ignore
 	seeds: ['src/infra/db/seeding/seeds/**/*{.ts,.js}'],
 	factories: ['src/infra/db/seeding/factories/**/*{.ts,.js}'],
-})
-
-// module.exports = AppDataSource
+} as DataSourceOptions

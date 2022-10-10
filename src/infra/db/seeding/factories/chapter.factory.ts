@@ -6,6 +6,5 @@ import { Book } from '../../entity/Book'
 define(Chapter, (faker: Faker) => {
 	const chapter = new Chapter()
 	chapter.name = faker.name.firstName()
-	chapter.book = factory(Book)() as any
 	return chapter
 })

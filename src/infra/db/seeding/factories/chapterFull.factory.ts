@@ -8,7 +8,6 @@ define(ChapterFull, (faker: Faker) => {
 	chapterFull.originalText = faker.lorem.paragraph()
 	chapterFull.translate = faker.lorem.paragraph()
 	chapterFull.tagName = 'p'
-	chapterFull.chapter = factory(Chapter)() as any
 
 	return chapterFull
 })

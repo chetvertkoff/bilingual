@@ -5,6 +5,5 @@ import { Users } from '../../entity/Users'
 
 define(Book, (faker: Faker) => {
 	const book = new Book()
-	book.user = factory(Users)() as any
 	return book
 })

@@ -1,4 +1,7 @@
-import { AppDataSource } from './data-source'
+import config from '../../../ormconfig'
+import { DataSource } from 'typeorm'
+
+const AppDataSource = new DataSource(config)
 
 export const runDB = async () => {
 	try {
