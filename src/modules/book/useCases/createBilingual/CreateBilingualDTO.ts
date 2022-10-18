@@ -6,10 +6,10 @@ export interface BookChapterElementDTO {
 }
 
 export interface BookChapterDTO {
-	id: string
-	chapter: BookChapterElementDTO[]
+	name: string
+	chapterFull: BookChapterElementDTO[]
 }
 
 export interface BilingualDTO {
-	bilingual: BookChapterDTO[]
+	chapters: BookChapterDTO[]
 }

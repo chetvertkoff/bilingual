@@ -1,4 +1,4 @@
-import { GetBilingualUseCase } from './GetBilingualUseCase'
+import { CreateBilingualUseCase } from './CreateBilingualUseCase'
 import { BaseController } from '../../../../core/infra/BaseController'
 import { v4 as uuidv4 } from 'uuid'
 import path from 'path'
@@ -15,19 +15,19 @@ import path from 'path'
  * 7 notificate user
  */
 
-export class GetBilingualController extends BaseController {
-	constructor(private getBilingualUseCase: GetBilingualUseCase) {
+export class CreateBilingualController extends BaseController {
+	constructor(private createBilingualUseCase: CreateBilingualUseCase) {
 		super()
 	}
 
 	public async executeImpl() {
 		try {
 			const bookName = uuidv4() as string
-			const filePath = path.join(__basedir, `/upload/book/${bookName}.epub`)
+			const bookPath = path.join(__basedir, `/upload/book/${bookName}.epub`)
 			const userId = String(this.req.query.userId)
 
-			await this.uploadStreamFile(filePath)
-			this.getBilingualUseCase.execute(filePath, userId).then()
+			await this.uploadStreamFile(bookPath)
+			this.createBilingualUseCase.execute({ bookPath, userId }).then()
 
 			return this.ok(this.res)
 		} catch (e) {

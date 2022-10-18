@@ -8,7 +8,7 @@ export interface ParsedChapterDTO {
 }
 
 export interface HtmlParserResultDTO {
-	id: string
+	name: string
 	chapter: ParsedChapterDTO[]
 }
 
@@ -34,7 +34,7 @@ export class HtmlParseService implements IHtmlParseService {
 		if (!document.querySelector('p') && !this.isHeadingInDocument(document)) return null
 
 		return {
-			id,
+			name: id,
 			chapter: this.parseChapter(document.body),
 		}
 	}

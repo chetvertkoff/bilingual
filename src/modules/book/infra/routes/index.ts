@@ -1,7 +1,8 @@
 import express from 'express'
-import { getBilingualController } from '../../useCases/getBilingual'
+import { createBilingualController } from '../../useCases/createBilingual'
+
 const bookRouter = express.Router()
 
-bookRouter.post('/get-bilingual', (req, res) => getBilingualController.execute(req, res))
+bookRouter.post('/create-bilingual', (req, res) => createBilingualController.execute(req, res))
 
 export { bookRouter }

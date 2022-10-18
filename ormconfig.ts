@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import { entities } from './src/infra/db/entity/entities'
 import { DataSourceOptions } from 'typeorm/data-source/DataSourceOptions'
 

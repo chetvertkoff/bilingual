@@ -1,6 +1,6 @@
 import { HtmlParserResultDTO, ParsedChapterDTO } from './HtmlParseService'
 import { Result } from '../../../core/helpers/Result'
-import { BookChapterDTO, BookChapterElementDTO } from '../useCases/getBilingual/GetBilingualDTO'
+import { BookChapterDTO, BookChapterElementDTO } from '../useCases/createBilingual/CreateBilingualDTO'
 import axios from 'axios'
 
 export interface ITranslateService {
@@ -21,8 +21,8 @@ export class TranslateService implements ITranslateService {
 		const res: BookChapterDTO[] = []
 		for (const [i, ch] of book.entries()) {
 			console.log(i, ' of ', book.length)
-			const chapter = await this.translateChapter(ch.chapter, i, book.length)
-			res.push({ ...ch, chapter })
+			const chapterFull = await this.translateChapter(ch.chapter, i, book.length)
+			res.push({ name: ch.name, chapterFull })
 		}
 		return res
 	}
@@ -36,7 +36,7 @@ export class TranslateService implements ITranslateService {
 
 			return translation
 		} catch (e) {
-			console.log(text)
+			// console.log(text)
 			return ''
 		}
 	}
