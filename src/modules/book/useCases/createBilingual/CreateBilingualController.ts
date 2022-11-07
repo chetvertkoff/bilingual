@@ -3,18 +3,6 @@ import { BaseController } from '../../../../core/infra/BaseController'
 import { v4 as uuidv4 } from 'uuid'
 import path from 'path'
 
-/**
- * controller steps
- *
- * 1 return response
- * 2 upload book file
- * 3 read file
- * 4 delete file
- * 5 get bilingual
- * 6 save bilingual
- * 7 notificate user
- */
-
 export class CreateBilingualController extends BaseController {
 	constructor(private createBilingualUseCase: CreateBilingualUseCase) {
 		super()

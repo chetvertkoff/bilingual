@@ -1,8 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
 import { Book } from './Book'
+import { BaseEntity } from './BaseEntity'
 
 @Entity()
-export class Users {
+export class Users extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number
 

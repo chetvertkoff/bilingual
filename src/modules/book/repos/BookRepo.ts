@@ -17,18 +17,24 @@ export class BookRepo implements IBookRepo {
 	constructor(private db: EntityManager) {}
 
 	public async save(book: BilingualDTO, userID: number): Promise<Result<unknown>> {
+		// TODO применить декоратор
+		const { db } = this
+		const queryRunner = db.connection.createQueryRunner()
 		try {
-			const { db } = this
+			await queryRunner.connect()
+			const { manager } = queryRunner
 
-			const userRepo = db.getRepository(Users)
-			const bookRepo = db.getRepository(Book)
-			const chapterRepo = db.getRepository(Chapter)
-			const chapterFullRepo = db.getRepository(ChapterFull)
+			const userRepo = manager.getRepository(Users)
+			const bookRepo = manager.getRepository(Book)
+			const chapterRepo = manager.getRepository(Chapter)
+			const chapterFullRepo = manager.getRepository(ChapterFull)
 
 			const user = await userRepo.findOneBy({
 				id: userID,
 			})
 			const bookModel = BookMap.toDb({ ...book, user })
+
+			await queryRunner.startTransaction()
 
 			await bookRepo.save(bookModel)
 
@@ -50,9 +56,15 @@ export class BookRepo implements IBookRepo {
 
 			await chapterFullRepo.save(chaptersFull)
 
+			await queryRunner.commitTransaction()
+
 			return Result.ok()
 		} catch (e) {
+			console.log(e)
+			await queryRunner.rollbackTransaction()
 			return Result.fail(e)
+		} finally {
+			await queryRunner.release()
 		}
 	}
 }

@@ -1,12 +1,10 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
 import { Book } from './Book'
 import { ChapterFull } from './ChapterFull'
+import { BaseEntity } from './BaseEntity'
 
 @Entity()
-export class Chapter {
-	@PrimaryGeneratedColumn()
-	id: number
-
+export class Chapter extends BaseEntity {
 	@Column()
 	name: string
 

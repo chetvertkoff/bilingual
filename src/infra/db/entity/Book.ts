@@ -1,12 +1,10 @@
-import { Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Entity, ManyToOne, OneToMany } from 'typeorm'
 import { Chapter } from './Chapter'
 import { Users } from './Users'
+import { BaseEntity } from './BaseEntity'
 
 @Entity()
-export class Book {
-	@PrimaryGeneratedColumn()
-	id: number
-
+export class Book extends BaseEntity {
 	@ManyToOne(() => Users, (user) => user.books)
 	user: Users
 

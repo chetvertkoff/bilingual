@@ -2,6 +2,7 @@ import { HtmlParserResultDTO, ParsedChapterDTO } from './HtmlParseService'
 import { Result } from '../../../core/helpers/Result'
 import { BookChapterDTO, BookChapterElementDTO } from '../useCases/createBilingual/CreateBilingualDTO'
 import axios from 'axios'
+import { JSDOM } from 'jsdom'
 
 export interface ITranslateService {
 	execute(book: HtmlParserResultDTO[]): Promise<Result<BookChapterDTO[]>>
@@ -30,13 +31,12 @@ export class TranslateService implements ITranslateService {
 	private translateSentence = async (text: string): Promise<string> => {
 		text = text.replace(/[^\w ]/gm, '')
 		try {
-			const {
-				data: { translation },
-			} = await axios.get<{ translation: string }>(`http://localhost:3000/api/v1/en/ru/${text}`)
-
+			const { data } = await axios.get(`https://translate.google.com/m?sl=en&tl=ru&q=${encodeURIComponent(text)}`)
+			const document = new JSDOM(data).window.document
+			const translation = document.querySelector('.result-container').textContent ?? ''
+			console.log(translation)
 			return translation
 		} catch (e) {
-			// console.log(text)
 			return ''
 		}
 	}
