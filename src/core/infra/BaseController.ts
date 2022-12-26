@@ -1,9 +1,14 @@
 import { Request, Response } from 'express'
 import fs from 'fs'
+import { AppError } from './AppError'
 
 export abstract class BaseController {
 	protected req: Request
 	protected res: Response
+
+	protected get userId() {
+		return this.req.get('UserId') ?? ''
+	}
 
 	protected abstract executeImpl(): Promise<void | any>
 
@@ -15,11 +20,11 @@ export abstract class BaseController {
 
 	protected async uploadStreamFile(filePath: string): Promise<string> {
 		return new Promise((resolve, reject) => {
-			const stream = fs.createWriteStream(filePath)
+			const stream = fs.createWriteStream(filePath, { highWaterMark: 1 })
 			// With the open - event, data will start being written
 			// from the request to the stream's destination path
 			stream.on('open', () => {
-				// console.log('Stream open ...  0.00%')
+				console.log('Stream open ...  0.00%')
 				this.req.pipe(stream)
 			})
 
@@ -30,13 +35,13 @@ export abstract class BaseController {
 				const total = parseInt(this.req.headers['content-length'])
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const pWritten = ((written / total) * 100).toFixed(2)
-				// console.log(`Processing  ...  ${pWritten}% done`)
+				console.log(`Processing  ...  ${pWritten}% done`)
 			})
 
 			// When the stream is finished, print a final message
 			// Also, resolve the location of the file to calling function
 			stream.on('close', () => {
-				// console.log('Processing  ...  100%')
+				console.log('Processing  ...  100%')
 				resolve(filePath)
 			})
 			// If something goes wrong, reject the primise
@@ -52,8 +57,6 @@ export abstract class BaseController {
 	}
 
 	public fail(error: Error | string) {
-		return this.res.status(500).json({
-			message: error,
-		})
+		return this.res.status(500).json(new AppError.UnknownError(JSON.stringify(error)))
 	}
 }

@@ -10,12 +10,13 @@ export class CreateBilingualController extends BaseController {
 
 	public async executeImpl() {
 		try {
+			// TODO добавить проверку на файл
 			const bookName = uuidv4() as string
 			const bookPath = path.join(__basedir, `/upload/book/${bookName}.epub`)
-			const userId = String(this.req.query.userId)
 
 			await this.uploadStreamFile(bookPath)
-			this.createBilingualUseCase.execute({ bookPath, userId }).then()
+
+			this.createBilingualUseCase.execute({ bookPath, userId: this.userId }).then()
 
 			return this.ok(this.res)
 		} catch (e) {

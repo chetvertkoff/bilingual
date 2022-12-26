@@ -10,13 +10,15 @@ import { ChapterFullMap } from '../mapper/ChapterFullMap'
 import { Result } from '../../../core/helpers/Result'
 
 export interface IBookRepo {
-	save(book: BilingualDTO, userID: number): Promise<Result<unknown>>
+	save(book: BilingualDTO, userID: number): Promise<Result>
+	getBilingualItem(id: string, userId: string): Promise<Result<Book | Error>>
+	getBilingualItems(userId: string): Promise<Result<Book[] | Error>>
 }
 
 export class BookRepo implements IBookRepo {
 	constructor(private db: EntityManager) {}
 
-	public async save(book: BilingualDTO, userID: number): Promise<Result<unknown>> {
+	public async save(book: BilingualDTO, userID: number): Promise<Result> {
 		// TODO применить декоратор
 		const { db } = this
 		const queryRunner = db.connection.createQueryRunner()
@@ -65,6 +67,40 @@ export class BookRepo implements IBookRepo {
 			return Result.fail(e)
 		} finally {
 			await queryRunner.release()
+		}
+	}
+
+	public async getBilingualItem(id: string, userId: string) {
+		const { manager } = this.db.connection
+
+		try {
+			const bookRepo = manager.getRepository(Book)
+			const item = await bookRepo.findOne({
+				where: { id: +id, user: { id: +userId } },
+				relations: {
+					chapters: {
+						chaptersFull: true,
+					},
+				},
+			})
+
+			return Result.ok(item)
+		} catch (e) {
+			return Result.fail(e)
+		}
+	}
+
+	public async getBilingualItems(userId: string) {
+		const { manager } = this.db.connection
+
+		try {
+			const bookRepo = manager.getRepository(Book)
+			const items = await bookRepo.find({
+				where: { user: { id: +userId } },
+			})
+			return Result.ok(items)
+		} catch (e) {
+			return Result.fail(e)
 		}
 	}
 }

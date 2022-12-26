@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { CreateBilingualController } from './CreateBilingualController'
+import { CreateBilingualController } from './CreateBilingual.controller'
 import { CreateBilingualUseCase } from './CreateBilingualUseCase'
 import { bookReaderService, htmlParseService, notifyServiceFactory, translateService } from '../../services'
 import * as DTO from './CreateBilingualDTO'
