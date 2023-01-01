@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import fs from 'fs'
 import { AppError } from './AppError'
+import { SimpleResponse } from './SimpleResponse'
 
 export abstract class BaseController {
 	protected req: Request
@@ -53,7 +54,7 @@ export abstract class BaseController {
 	}
 
 	public ok<T>(res: Response, dto?: T) {
-		return !!dto ? res.status(200).json(dto) : res.sendStatus(200)
+		return res.status(200).json(dto ?? new SimpleResponse())
 	}
 
 	public fail(error: Error | string) {
