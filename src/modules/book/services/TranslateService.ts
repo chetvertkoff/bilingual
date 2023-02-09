@@ -6,6 +6,7 @@ import { JSDOM } from 'jsdom'
 
 export interface ITranslateService {
 	execute(book: HtmlParserResultDTO[]): Promise<Result<BookChapterDTO[]>>
+	translate(text: string): Promise<string>
 }
 
 export class TranslateService implements ITranslateService {
@@ -16,6 +17,10 @@ export class TranslateService implements ITranslateService {
 		} catch (e) {
 			return Result.fail<BookChapterDTO[]>(e)
 		}
+	}
+
+	public async translate(text: string) {
+		return this.translateSentence(text)
 	}
 
 	private getBookTranslate = async (book: HtmlParserResultDTO[]): Promise<BookChapterDTO[]> => {
