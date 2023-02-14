@@ -12,7 +12,7 @@ export default {
 	synchronize: true,
 	logging: false,
 	entities,
-	migrations: [],
+	migrations: ['migrations/**/*{.ts,.js}'],
 	subscribers: [],
 
 	// @ts-ignore

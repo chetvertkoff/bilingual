@@ -2,11 +2,11 @@ import { EntityManager } from 'typeorm'
 import { Users } from '../../../infra/db/entity/Users'
 import { Book } from '../../../infra/db/entity/Book'
 import { Chapter } from '../../../infra/db/entity/Chapter'
-import { ChapterFull } from '../../../infra/db/entity/ChapterFull'
+import { Paragraph } from '../../../infra/db/entity/Paragraph'
 import { BilingualDTO } from '../useCases/createBilingual/CreateBilingualDTO'
-import { BookMap } from '../mapper/BookMap'
-import { ChapterMap } from '../mapper/ChapterMap'
-import { ChapterFullMap } from '../mapper/ChapterFullMap'
+import { BookMap } from '../mappers/BookMap'
+import { ChapterMap } from '../mappers/ChapterMap'
+import { ParagraphMap } from '../mappers/ParagraphMap'
 import { Result } from '../../../core/helpers/Result'
 
 export interface IBookRepo {
@@ -29,7 +29,7 @@ export class BookRepo implements IBookRepo {
 			const userRepo = manager.getRepository(Users)
 			const bookRepo = manager.getRepository(Book)
 			const chapterRepo = manager.getRepository(Chapter)
-			const chapterFullRepo = manager.getRepository(ChapterFull)
+			const paragraphRepo = manager.getRepository(Paragraph)
 
 			const user = await userRepo.findOneBy({
 				id: userID,
@@ -47,16 +47,16 @@ export class BookRepo implements IBookRepo {
 
 			await chapterRepo.save(chapters)
 
-			const chaptersFull = chapters
+			const paragraphs = chapters
 				.map((ch) =>
-					ch.chapterFull.map((item) => {
-						ch.chapterFull && delete ch.chapterFull
-						return ChapterFullMap.toDb({ ...item, chapter: ch })
+					ch.paragraph.map((item) => {
+						ch.paragraph && delete ch.paragraph
+						return ParagraphMap.toDb({ ...item, chapter: ch })
 					})
 				)
 				.flat()
 
-			await chapterFullRepo.save(chaptersFull)
+			await paragraphRepo.save(paragraphs)
 
 			await queryRunner.commitTransaction()
 
@@ -79,7 +79,7 @@ export class BookRepo implements IBookRepo {
 				where: { id: +id, user: { id: +userId } },
 				relations: {
 					chapters: {
-						chaptersFull: true,
+						paragraphs: true,
 					},
 				},
 			})

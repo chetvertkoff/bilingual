@@ -1,4 +1,3 @@
-// @ts-nocheck
 import WebSocket from 'ws'
 import { Notifyer } from './Notifyer'
 

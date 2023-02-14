@@ -1,8 +1,7 @@
 import 'reflect-metadata'
-import config from '../../../ormconfig'
-import { DataSource } from 'typeorm'
+import connectionSource from './ormconfig'
 
-export const AppDataSource = new DataSource(config)
+export const AppDataSource = connectionSource
 
 export const runDB = async () => {
 	try {

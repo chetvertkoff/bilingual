@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
 import { Book } from './Book'
-import { ChapterFull } from './ChapterFull'
+import { Paragraph } from './Paragraph'
 import { BaseEntity } from './BaseEntity'
 
 @Entity()
@@ -11,6 +11,6 @@ export class Chapter extends BaseEntity {
 	@ManyToOne(() => Book, (book) => book.chapters)
 	book: Book
 
-	@OneToMany(() => ChapterFull, (chapterFull) => chapterFull.chapter)
-	chaptersFull: ChapterFull[]
+	@OneToMany(() => Paragraph, (paragraph) => paragraph.chapter)
+	paragraphs: Paragraph[]
 }

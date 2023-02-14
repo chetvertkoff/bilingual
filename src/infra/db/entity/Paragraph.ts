@@ -3,7 +3,7 @@ import { Chapter } from './Chapter'
 import { BaseEntity } from './BaseEntity'
 
 @Entity()
-export class ChapterFull extends BaseEntity {
+export class Paragraph extends BaseEntity {
 	@Column()
 	originalText: string
 
@@ -18,6 +18,6 @@ export class ChapterFull extends BaseEntity {
 	})
 	translateDict: string
 
-	@ManyToOne(() => Chapter, (chapter) => chapter.chaptersFull)
+	@ManyToOne(() => Chapter, (chapter) => chapter.paragraphs)
 	chapter: Chapter
 }

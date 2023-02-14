@@ -7,7 +7,7 @@ export interface BookChapterElementDTO {
 
 export interface BookChapterDTO {
 	name: string
-	chapterFull: BookChapterElementDTO[]
+	paragraph: BookChapterElementDTO[]
 }
 
 export interface BilingualDTO {

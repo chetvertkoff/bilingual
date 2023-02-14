@@ -6,7 +6,7 @@ interface Props {
 	tagName: string
 }
 
-export class ChapterFull extends Entity<Props> {
+export class Paragraph extends Entity<Props> {
 	get translate(): string {
 		return this.props.translate
 	}
@@ -22,6 +22,6 @@ export class ChapterFull extends Entity<Props> {
 		super(props)
 	}
 	public static create(props: Props) {
-		return new ChapterFull(props)
+		return new Paragraph(props)
 	}
 }

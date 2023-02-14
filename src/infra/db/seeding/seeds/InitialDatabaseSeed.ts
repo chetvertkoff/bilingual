@@ -2,7 +2,7 @@ import { Factory, Seeder } from 'typeorm-seeding'
 import { Connection } from 'typeorm'
 import { Book } from '../../entity/Book'
 import { Chapter } from '../../entity/Chapter'
-import { ChapterFull } from '../../entity/ChapterFull'
+import { Paragraph } from '../../entity/Paragraph'
 import { Users } from '../../entity/Users'
 
 export default class InitialDatabaseSeed implements Seeder {
@@ -23,10 +23,10 @@ export default class InitialDatabaseSeed implements Seeder {
 			})
 			.createMany(20)
 
-		await factory(ChapterFull)()
-			.map(async (chapterFull) => {
-				chapterFull.chapter = chapter[Math.floor(Math.random() * chapter.length)]
-				return chapterFull
+		await factory(Paragraph)()
+			.map(async (paragraph) => {
+				paragraph.chapter = chapter[Math.floor(Math.random() * chapter.length)]
+				return paragraph
 			})
 			.createMany(50)
 	}

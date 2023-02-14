@@ -1,48 +1,35 @@
 import { WebSocket } from 'ws'
 import { IncomingMessage } from 'http'
-import { v4 as uuidv4 } from 'uuid'
-
-interface WebSocketExtended extends WebSocket {
-	connectionId: string
-}
+import { Callback } from '../../core'
 
 type Params = Record<string, string> & {
 	userId: string
 }
 
-interface ConnectionData {
-	params: Params
-	send: WebSocketExtended['send']
-}
-
 export class Notifyer {
-	private clients = new Map<string, ConnectionData>()
+	private clients = new Map<string, Callback>()
 
-	public addClient(client: WebSocketExtended, req: IncomingMessage) {
+	public addClient(client: WebSocket, req: IncomingMessage) {
 		try {
-			client.connectionId = uuidv4()
-			const { connectionId } = client
-			if (this.clients.has(connectionId)) return
+			const { userId } = this.getParamsFromUrl(req.url)
+			if (this.clients.has(userId)) return
 
-			this.clients.set(connectionId, { params: this.getParamsFromUrl(req.url), send: client.send.bind(client) })
+			this.clients.set(userId, client.send.bind(client))
 
 			client.on('close', () => {
-				if (this.clients.has(connectionId)) this.clients.delete(connectionId)
+				if (this.clients.has(userId)) this.clients.delete(userId)
 			})
 		} catch (e) {}
 	}
 
 	public async send(userId: string, message: any) {
-		console.log(userId, this.clients)
-		this.clients.forEach((val) => {
-			if (val?.params.userId === userId) {
-				val?.send(JSON.stringify(message))
-			}
-		})
+		try {
+			if (this.clients.has(userId)) return
+			this.clients.get(userId)?.(JSON.stringify(message))
+		} catch (e) {}
 	}
 
-	private getParamsFromUrl(url: string): ConnectionData['params'] {
-		// TODO сделать с итератором
+	private getParamsFromUrl(url: string): Params {
 		const params = {
 			userId: null,
 		}

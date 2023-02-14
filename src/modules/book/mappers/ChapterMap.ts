@@ -5,7 +5,7 @@ export class ChapterMap {
 		return {
 			name: chapter.name,
 			book: chapter.book,
-			chapterFull: chapter.chapterFull,
+			paragraph: chapter.paragraph,
 		}
 	}
 

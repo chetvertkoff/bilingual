@@ -27,8 +27,8 @@ export class TranslateService implements ITranslateService {
 		const res: BookChapterDTO[] = []
 		for (const [i, ch] of book.entries()) {
 			console.log(i, ' of ', book.length)
-			const chapterFull = await this.translateChapter(ch.chapter, i, book.length)
-			res.push({ name: ch.name, chapterFull })
+			const paragraph = await this.translateChapter(ch.chapter, i, book.length)
+			res.push({ name: ch.name, paragraph })
 		}
 		return res
 	}

@@ -10,7 +10,10 @@
       "schema:drop": "ts-node ./node_modules/typeorm/cli.js schema:drop",
       "schema:sync": "ts-node ./node_modules/typeorm/cli.js schema:sync",
       "eslint": "node_modules/.bin/eslint src/",
-      "eslint:fix": "eslint --fix"
+      "eslint:fix": "eslint --fix",
+      "migration:create": "typeorm migration:create ./migrations/test",
+      "migration:up": "ts-node ./node_modules/typeorm/cli.js migration:run -- -d src/infra/db/ormconfig.ts",
+      "migration:down": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:revert -d src/infra/db/ormconfig.ts"
    },
    "devDependencies": {
       "@types/express": "^4.17.13",
