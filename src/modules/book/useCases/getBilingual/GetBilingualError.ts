@@ -4,7 +4,7 @@ import { UseCaseError } from '../../../../core/helpers/UseCaseError'
 export namespace GetBilingualError {
 	export class BookQueryError extends Result<UseCaseError> {
 		constructor() {
-			super(false, 'Bilingual receiving error')
+			super(false, 'get bilingual receiving error')
 		}
 	}
 }

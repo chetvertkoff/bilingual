@@ -12,7 +12,6 @@ export class GetBilingualItemsUseCase
 	constructor(private bookRepo: IBookRepo) {}
 
 	public async execute({ userId }: Props) {
-		console.log(userId)
 		const itemResult = await this.bookRepo.getBilingualItems(userId)
 		if (!itemResult.success) return new GetBilingualItemsError.BookQueryError()
 		return itemResult.value as Book[]
