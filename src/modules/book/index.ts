@@ -1,4 +1,4 @@
-export * from './entity'
+export * from './domain'
 export * from './infra'
 export * from './mappers'
 export * from './repos'

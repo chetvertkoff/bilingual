@@ -11,7 +11,7 @@ export class GetChapterUseCase implements UseCase<Props, any> {
 	constructor(private chapterRepo: IChapterRepo) {}
 
 	async execute({ userId, params }: Props) {
-		const res = await this.chapterRepo.getChapter(userId, params)
+		const res = await this.chapterRepo.getChapterByParamsQuery(userId, params)
 		if (!res.success) return new GetChapterError.ChapterQueryError()
 		return res
 	}

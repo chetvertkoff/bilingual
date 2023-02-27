@@ -1,72 +1,61 @@
 import { EntityManager } from 'typeorm'
 import { Users } from '../../../infra/db/entity/Users'
 import { Book } from '../../../infra/db/entity/Book'
-import { Chapter } from '../../../infra/db/entity/Chapter'
-import { Paragraph } from '../../../infra/db/entity/Paragraph'
-import { BilingualDTO } from '../useCases/createBilingual/CreateBilingualDTO'
 import { BookMap } from '../mappers/BookMap'
-import { ChapterMap } from '../mappers/ChapterMap'
-import { ParagraphMap } from '../mappers/ParagraphMap'
 import { Result } from '../../../core/helpers/Result'
+import { BookDomain } from '../domain'
+import { BaseRepo, IBaseRepo } from '../../../core/infra'
 
-export interface IBookRepo {
-	save(book: BilingualDTO, userID: number): Promise<Result>
-	getBilingualItem(id: string, userId: string): Promise<Result<Book | Error>>
-	getBilingualItems(userId: string): Promise<Result<Book[] | Error>>
+export interface IBookRepo extends IBaseRepo {
+	saveCommand(book: BookDomain, user: Users): Promise<Result>
+	getLastBookQuery(userId: number): Promise<Result<BookDomain>>
+	getBookByIdQuery(bookId: number): Promise<Result<BookDomain>>
+	getBilingualItem(id: string, userId: string): Promise<Result<Book>>
+	getBilingualItems(userId: string): Promise<Result<Book[]>>
 }
 
-export class BookRepo implements IBookRepo {
-	constructor(private db: EntityManager) {}
+export class BookRepo extends BaseRepo implements IBookRepo {
+	constructor(db: EntityManager) {
+		super(db)
+	}
 
-	public async save(book: BilingualDTO, userID: number): Promise<Result> {
-		// TODO применить декоратор
-		const { db } = this
-		const queryRunner = db.connection.createQueryRunner()
+	private get repo() {
+		return this.db.connection.manager.getRepository(Book)
+	}
+
+	public async saveCommand(book: BookDomain, user: Users): Promise<Result> {
 		try {
-			await queryRunner.connect()
-			const { manager } = queryRunner
-
-			const userRepo = manager.getRepository(Users)
-			const bookRepo = manager.getRepository(Book)
-			const chapterRepo = manager.getRepository(Chapter)
-			const paragraphRepo = manager.getRepository(Paragraph)
-
-			const user = await userRepo.findOneBy({
-				id: userID,
-			})
-			const bookModel = BookMap.toDb({ ...book, user })
-
-			await queryRunner.startTransaction()
-
-			await bookRepo.save(bookModel)
-
-			const chapters = book.chapters.map((item) => {
-				bookModel.chapters && delete bookModel.chapters
-				return ChapterMap.toDb({ ...item, book: bookModel })
-			})
-
-			await chapterRepo.save(chapters)
-
-			const paragraphs = chapters
-				.map((ch) =>
-					ch.paragraph.map((item) => {
-						ch.paragraph && delete ch.paragraph
-						return ParagraphMap.toDb({ ...item, chapter: ch })
-					})
-				)
-				.flat()
-
-			await paragraphRepo.save(paragraphs)
-
-			await queryRunner.commitTransaction()
+			await this.repo.save({ user, ...BookMap.toDb(book) })
 
 			return Result.ok()
 		} catch (e) {
 			console.log(e)
-			await queryRunner.rollbackTransaction()
 			return Result.fail(e)
-		} finally {
-			await queryRunner.release()
+		}
+	}
+
+	public async getLastBookQuery(userId: number): Promise<Result<BookDomain>> {
+		try {
+			const item = await this.repo.findOne({
+				where: { user: { id: +userId } },
+				order: { id: 'DESC' },
+			})
+
+			return Result.ok<BookDomain>(BookMap.toDomain(item))
+		} catch (e) {
+			return Result.fail<BookDomain>(e)
+		}
+	}
+
+	public async getBookByIdQuery(bookId: number): Promise<Result<BookDomain>> {
+		try {
+			const item = await this.repo.findOne({
+				where: { id: bookId },
+			})
+
+			return Result.ok<BookDomain>(BookMap.toDomain(item))
+		} catch (e) {
+			return Result.fail<BookDomain>(e)
 		}
 	}
 
@@ -77,16 +66,11 @@ export class BookRepo implements IBookRepo {
 			const bookRepo = manager.getRepository(Book)
 			const item = await bookRepo.findOne({
 				where: { id: +id, user: { id: +userId } },
-				relations: {
-					chapters: {
-						paragraphs: true,
-					},
-				},
 			})
 
-			return Result.ok(item)
+			return Result.ok<Book>(item)
 		} catch (e) {
-			return Result.fail(e)
+			return Result.fail<Book>(e)
 		}
 	}
 
@@ -98,9 +82,9 @@ export class BookRepo implements IBookRepo {
 			const items = await bookRepo.find({
 				where: { user: { id: +userId } },
 			})
-			return Result.ok(items)
+			return Result.ok<Book[]>(items)
 		} catch (e) {
-			return Result.fail(e)
+			return Result.fail<Book[]>(e)
 		}
 	}
 }

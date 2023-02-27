@@ -1,21 +1,24 @@
 import { HtmlParserResultDTO, ParsedChapterDTO } from './HtmlParseService'
 import { Result } from '../../../core/helpers/Result'
-import { BookChapterDTO, BookChapterElementDTO } from '../useCases/createBilingual/CreateBilingualDTO'
 import axios from 'axios'
 import { JSDOM } from 'jsdom'
+import { ChapterDomain, ParagraphDomain } from '../domain'
+import { IObserver } from '../../../core/infra'
 
 export interface ITranslateService {
-	execute(book: HtmlParserResultDTO[]): Promise<Result<BookChapterDTO[]>>
+	execute(eventId: string, book: HtmlParserResultDTO[]): Promise<Result<ChapterDomain[]>>
 	translate(text: string): Promise<string>
 }
 
 export class TranslateService implements ITranslateService {
-	public async execute(book: HtmlParserResultDTO[]): Promise<Result<BookChapterDTO[]>> {
+	constructor(private observer: IObserver) {}
+
+	public async execute(eventId: string, book: HtmlParserResultDTO[]): Promise<Result<ChapterDomain[]>> {
 		try {
-			const res = await this.getBookTranslate(book)
-			return Result.ok<BookChapterDTO[]>(res)
+			const res = await this.getBookTranslate(book, eventId)
+			return Result.ok<ChapterDomain[]>(res)
 		} catch (e) {
-			return Result.fail<BookChapterDTO[]>(e)
+			return Result.fail<ChapterDomain[]>(e)
 		}
 	}
 
@@ -23,12 +26,16 @@ export class TranslateService implements ITranslateService {
 		return this.translateSentence(text)
 	}
 
-	private getBookTranslate = async (book: HtmlParserResultDTO[]): Promise<BookChapterDTO[]> => {
-		const res: BookChapterDTO[] = []
+	private getBookTranslate = async (
+		book: HtmlParserResultDTO[],
+		onChapterTranslateEventId: string
+	): Promise<ChapterDomain[]> => {
+		const res: ChapterDomain[] = []
 		for (const [i, ch] of book.entries()) {
-			console.log(i, ' of ', book.length)
-			const paragraph = await this.translateChapter(ch.chapter, i, book.length)
-			res.push({ name: ch.name, paragraph })
+			// console.log(i, ' of ', book.length)
+			const paragraphs = await this.translateChapter(ch.chapter, i, book.length)
+			res.push(new ChapterDomain({ name: ch.name, paragraphs }))
+			this.observer.dispatch(onChapterTranslateEventId, { chapterIndex: i, chapterCount: book.length })
 		}
 		return res
 	}
@@ -39,7 +46,6 @@ export class TranslateService implements ITranslateService {
 			const { data } = await axios.get(`https://translate.google.com/m?sl=en&tl=ru&q=${encodeURIComponent(text)}`)
 			const document = new JSDOM(data).window.document
 			const translation = document.querySelector('.result-container').textContent ?? ''
-			console.log(translation)
 			return translation
 		} catch (e) {
 			return ''
@@ -50,15 +56,16 @@ export class TranslateService implements ITranslateService {
 		chapters: ParsedChapterDTO[],
 		ind: number,
 		total: number
-	): Promise<BookChapterElementDTO[]> => {
-		const res: BookChapterElementDTO[] = []
+	): Promise<ParagraphDomain[]> => {
+		const res: ParagraphDomain[] = []
 		for (const [i, ch] of chapters.entries()) {
-			console.log(ind, '_', i, ' of ', total)
-			res.push({
-				...ch,
-				translate: await this.translateSentence(ch.originalText),
-				translateDict: {},
-			})
+			// console.log(ind, '_', i, ' of ', total)
+			res.push(
+				new ParagraphDomain({
+					...ch,
+					translate: await this.translateSentence(ch.originalText),
+				})
+			)
 		}
 		return res
 	}

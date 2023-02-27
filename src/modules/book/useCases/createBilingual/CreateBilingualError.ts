@@ -4,7 +4,7 @@ import { UseCaseError } from '../../../../core/helpers/UseCaseError'
 export namespace CreateBilingualError {
 	export class BookParseError extends Result<UseCaseError> {
 		constructor() {
-			super(false, 'Book parsed error')
+			super(false, 'BookDomain parsed error')
 		}
 	}
 	export class BookTranslateError extends Result<UseCaseError> {

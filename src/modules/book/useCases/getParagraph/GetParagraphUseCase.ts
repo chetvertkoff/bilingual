@@ -11,7 +11,7 @@ export class GetParagraphUseCase implements UseCase<Props, any> {
 	constructor(private paragraphRepo: IParagraphRepo) {}
 
 	async execute({ userId, params }: Props) {
-		const res = await this.paragraphRepo.getParagraph(userId, params)
+		const res = await this.paragraphRepo.getParagraphByParamsQuery(userId, params)
 		if (!res.success) return new GetParagraphError.ParagraphQueryError()
 		return res
 	}

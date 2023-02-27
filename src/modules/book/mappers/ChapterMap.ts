@@ -1,17 +1,19 @@
 import { Chapter } from '../../../infra/db/entity/Chapter'
+import { ChapterDomain } from '../domain'
+import { ParagraphMap } from './ParagraphMap'
 
 export class ChapterMap {
-	public static toDb(chapter) {
-		return {
-			name: chapter.name,
-			book: chapter.book,
-			paragraph: chapter.paragraph,
-		}
+	public static toDb(chapterDomain: ChapterDomain): Chapter {
+		const chapter = new Chapter()
+
+		chapter.id = chapterDomain.id
+		chapter.createdDate = chapterDomain.createdDate
+		chapter.name = chapterDomain.name
+
+		return chapter
 	}
 
-	public static fromDb(chapter: Chapter) {
-		return {
-			id: chapter.id,
-		}
+	public static toDomain(raw: Chapter): ChapterDomain {
+		return ChapterDomain.create({ ...raw, paragraphs: raw.paragraphs?.map((item) => ParagraphMap.toDomain(item)) })
 	}
 }

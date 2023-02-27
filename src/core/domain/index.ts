@@ -1,2 +1,2 @@
-export * from './Entity'
+export * from './BaseDomain'
 export * from './UseCase'

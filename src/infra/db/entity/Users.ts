@@ -4,9 +4,6 @@ import { BaseEntity } from './BaseEntity'
 
 @Entity()
 export class Users extends BaseEntity {
-	@PrimaryGeneratedColumn()
-	id: number
-
 	@Column()
 	firstName: string
 

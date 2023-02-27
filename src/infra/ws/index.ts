@@ -1,7 +1,7 @@
 import WebSocket from 'ws'
-import { Notifyer } from './Notifyer'
+import { Notifier } from './Notifier'
 
-export const notify = new Notifyer()
+export const notify = new Notifier()
 
 export const runWS = async () => {
 	const wsServer = new WebSocket.Server({ port: 27800 })

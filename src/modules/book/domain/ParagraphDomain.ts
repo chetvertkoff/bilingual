@@ -1,12 +1,13 @@
-import { Entity } from '../../../core/domain/Entity'
+import { BaseDomain } from '../../../core/domain/BaseDomain'
+import { BaseDomainProps } from '../../../core/domain/BaseDomainProps'
 
-interface Props {
+interface Props extends BaseDomainProps {
 	originalText: string
 	translate: string
 	tagName: string
 }
 
-export class Paragraph extends Entity<Props> {
+export class ParagraphDomain extends BaseDomain<Props> {
 	get translate(): string {
 		return this.props.translate
 	}
@@ -22,6 +23,6 @@ export class Paragraph extends Entity<Props> {
 		super(props)
 	}
 	public static create(props: Props) {
-		return new Paragraph(props)
+		return new ParagraphDomain(props)
 	}
 }

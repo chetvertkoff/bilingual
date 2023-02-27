@@ -1,15 +1,34 @@
 import { IBookReaderService } from '../../services/BookReaderService'
-import { IHtmlParseService } from '../../services/HtmlParseService'
+import { HtmlParserResultDTO, IHtmlParseService } from '../../services/HtmlParseService'
 import { ITranslateService } from '../../services/TranslateService'
 import { UseCase } from '../../../../core/domain/UseCase'
 import { CreateBilingualError } from './CreateBilingualError'
 import { Result } from '../../../../core/helpers/Result'
-import { BookNotifyFactory } from '../../services/BookNotifyService'
-import { IBookRepo } from '../../repos/BookRepo'
+import { Notifier } from '../../../../infra/ws/Notifier'
+import { IObserver, WsResponse } from '../../../../core/infra'
+import { WsEvents } from '../../../../core/constants'
+import { ISaveChaptersService } from './services/SaveChaptersService'
+import { CreateBilingualObserverEvents } from './constants'
+import { ChapterDomain } from '../../domain'
 
-type Props = {
+interface Props {
 	bookPath: string
 	userId: string
+}
+
+interface CreateBookProps extends Props {
+	eventId: string
+}
+
+interface ParseBookProps extends CreateBookProps {
+	bookId: number
+}
+
+interface TranslateBookProps extends ParseBookProps {
+	parsedBook: Result<HtmlParserResultDTO[]>
+}
+interface SaveBookProps extends ParseBookProps {
+	translatedChapters: Result<ChapterDomain[]>
 }
 
 export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
@@ -17,41 +36,90 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 		private bookReader: IBookReaderService,
 		private htmlParser: IHtmlParseService,
 		private translater: ITranslateService,
-		private notifyFactory: BookNotifyFactory,
-		private bookRepo: IBookRepo
+		private notify: Notifier,
+		private saveChaptersService: ISaveChaptersService,
+		private observer: IObserver
 	) {}
 
-	public async execute({ bookPath, userId }: Props) {
-		const notify = this.notifyFactory(userId)
+	public async execute({ userId, bookPath }: Props) {
+		const eventId = `${CreateBilingualObserverEvents.CHAPTER_TRANSLATE_PROGRESS}${userId}`
+
 		try {
-			const bookChaptersBody = await this.bookReader.execute(bookPath)
-			if (!bookChaptersBody.success) {
-				return notify.sendMessage(new CreateBilingualError.BookParseError())
-			}
-
-			const parsedBook = await this.htmlParser.execute(bookChaptersBody.value)
-			if (!parsedBook.success) {
-				return notify.sendMessage(new CreateBilingualError.BookParseError())
-			}
-
-			const translatedBook = await this.translater.execute(parsedBook.value)
-			if (!translatedBook.success) {
-				return notify.sendMessage(new CreateBilingualError.BookTranslateError())
-			}
-
-			const book = {
-				chapters: translatedBook.value,
-			}
-
-			const saveProgress = await this.bookRepo.save(book, Number(userId))
-			if (!saveProgress.success) {
-				return notify.sendMessage(new CreateBilingualError.BookSaveError())
-			}
-
-			return notify.sendMessage(Result.ok())
+			await this.createBook({ userId, bookPath, eventId })
 		} catch (e) {
-			console.log(e)
-			notify.sendMessage(Result.fail(new Error()))
+			this.notify.send(userId, Result.fail(new Error()))
+		} finally {
+			this.observer.unsubscribe(eventId)
 		}
+	}
+
+	private async createBook(props: CreateBookProps) {
+		const { userId } = props
+		const bookRes = await this.saveChaptersService.getNewBook(+userId)
+		if (!bookRes.success) {
+			this.notify.send(userId, new CreateBilingualError.BookSaveError())
+			return
+		}
+
+		this.notify.send(userId, Result.ok(new WsResponse(WsEvents.BOOKS_REQUEST)))
+
+		const bookId = bookRes.value.id
+
+		await this.parseBook({ ...props, bookId })
+	}
+
+	private async parseBook(props: ParseBookProps) {
+		const { bookPath, userId } = props
+		const bookChaptersBody = await this.bookReader.execute(bookPath)
+		if (!bookChaptersBody.success) {
+			this.notify.send(userId, new CreateBilingualError.BookParseError())
+			return
+		}
+
+		const parsedBook = await this.htmlParser.execute(bookChaptersBody.value)
+		if (!parsedBook.success) {
+			this.notify.send(userId, new CreateBilingualError.BookParseError())
+			return
+		}
+
+		await this.translateBook({ ...props, parsedBook })
+	}
+
+	private async translateBook(props: TranslateBookProps) {
+		const { eventId, parsedBook, userId } = props
+
+		this.observer.subscribe(eventId, ({ chapterIndex, chapterCount }) => {
+			const a = chapterIndex + 1
+			const b = chapterCount
+			const percent = Math.trunc((a / b) * 90)
+
+			this.notify.send(userId, Result.ok(new WsResponse(WsEvents.TRANSLATE_BOOK_PROGRESS, { progress: percent })))
+		})
+
+		const translatedChapters = await this.translater.execute(eventId, parsedBook.value)
+
+		if (!translatedChapters.success) {
+			this.notify.send(userId, new CreateBilingualError.BookTranslateError())
+			return
+		}
+
+		this.notify.send(userId, Result.ok(new WsResponse(WsEvents.TRANSLATE_BOOK_PROGRESS, { progress: 95 })))
+
+		await this.saveBook({ ...props, translatedChapters })
+	}
+
+	private async saveBook(props: SaveBookProps) {
+		const { userId, bookId, translatedChapters } = props
+		const saveProgress = await this.saveChaptersService.saveChaptersWithParagraphs(
+			+userId,
+			bookId,
+			translatedChapters.value
+		)
+		if (!saveProgress.success) {
+			this.notify.send(userId, new CreateBilingualError.BookSaveError())
+			return
+		}
+
+		this.notify.send(userId, Result.ok(new WsResponse(WsEvents.BOOKS_REQUEST)))
 	}
 }

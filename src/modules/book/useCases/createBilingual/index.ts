@@ -1,16 +1,18 @@
-// @ts-nocheck
 import { CreateBilingualController } from './CreateBilingual.controller'
 import { CreateBilingualUseCase } from './CreateBilingualUseCase'
-import { bookReaderService, htmlParseService, notifyServiceFactory, translateService } from '../../services'
+import { bookReaderService, htmlParseService, translateService } from '../../services'
 import * as DTO from './CreateBilingualDTO'
-import { bookRepo } from '../../repos'
+import { notify } from '../../../../infra/ws'
+import { saveChaptersService } from './services'
+import { observer } from '../../../../core/infra'
 
 const createBilingualUseCase = new CreateBilingualUseCase(
 	bookReaderService,
 	htmlParseService,
 	translateService,
-	notifyServiceFactory,
-	bookRepo
+	notify,
+	saveChaptersService,
+	observer
 )
 const createBilingualController = new CreateBilingualController(createBilingualUseCase)
 
