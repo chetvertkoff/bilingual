@@ -8,20 +8,17 @@ interface Props extends BaseDomainProps {
 }
 
 export class UserDomain extends BaseDomain<Props> {
-	public get firstName() {
-		return this.props.firstName
-	}
+	firstName: string
 
-	public get lastName() {
-		return this.props.lastName
-	}
+	lastName: string
 
-	public get email() {
-		return this.props.email
-	}
+	email: string
 
 	constructor(props: Props) {
 		super(props)
+		this.lastName = props.lastName
+		this.firstName = props.firstName
+		this.email = props.email
 	}
 
 	public static create(props: Props): UserDomain {

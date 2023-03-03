@@ -83,23 +83,13 @@ export class ParagraphRepo implements IParagraphRepo {
 	}
 
 	public async saveCommand(paragraph: ParagraphDomain, chapter: Chapter): Promise<Result> {
-		const { db } = this
-		const queryRunner = db.connection.createQueryRunner()
 		try {
-			await queryRunner.connect()
-			await queryRunner.startTransaction()
-
 			await this.repo.save({ chapter, ...ParagraphMap.toDb(paragraph) })
-
-			await queryRunner.commitTransaction()
 
 			return Result.ok()
 		} catch (e) {
 			console.log(e)
-			await queryRunner.rollbackTransaction()
 			return Result.fail(e)
-		} finally {
-			await queryRunner.release()
 		}
 	}
 }

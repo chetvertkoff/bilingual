@@ -1,4 +1,4 @@
-export class BaseResponseCatalog<T> {
+export class BaseResponseCatalog<T = unknown> {
 	public entries: T[]
 
 	public total: number

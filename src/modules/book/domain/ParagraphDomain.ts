@@ -8,19 +8,17 @@ interface Props extends BaseDomainProps {
 }
 
 export class ParagraphDomain extends BaseDomain<Props> {
-	get translate(): string {
-		return this.props.translate
-	}
+	translate: string
 
-	get tagName(): string {
-		return this.props.tagName
-	}
+	tagName: string
 
-	get originalText(): string {
-		return this.props.originalText
-	}
+	originalText: string
+
 	constructor(props: Props) {
 		super(props)
+		this.translate = props.translate
+		this.tagName = props.tagName
+		this.originalText = props.originalText
 	}
 	public static create(props: Props) {
 		return new ParagraphDomain(props)

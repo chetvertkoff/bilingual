@@ -1,12 +1,12 @@
 import { BaseResponseCatalog } from '../../../../core/infra/BaseResponseCatalog'
-import { Chapter } from '../../../../infra/db/entity/Chapter'
+import { ChapterDomain } from '../../domain'
 
-export class GetChapterResponse extends BaseResponseCatalog<Chapter> {
-	public first: Chapter
+export class GetChapterResponse extends BaseResponseCatalog<ChapterDomain> {
+	public first: ChapterDomain
 
-	public last: Chapter
+	public last: ChapterDomain
 
-	constructor(entries: Chapter[], total: number, first?: Chapter, last?: Chapter) {
+	constructor(entries: ChapterDomain[], total: number, first?: ChapterDomain, last?: ChapterDomain) {
 		super(entries, total)
 		this.first = first
 		this.last = last

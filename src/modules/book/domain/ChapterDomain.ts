@@ -8,16 +8,14 @@ interface Props extends BaseDomainProps {
 }
 
 export class ChapterDomain extends BaseDomain<Props> {
-	get name() {
-		return this.props.name
-	}
+	name: string
 
-	get paragraphs() {
-		return this.props.paragraphs ?? []
-	}
+	paragraphs: ParagraphDomain[]
 
 	constructor(props: Props) {
 		super(props)
+		this.name = props.name
+		this.paragraphs = props.paragraphs ?? []
 	}
 
 	public static create(props: Props) {

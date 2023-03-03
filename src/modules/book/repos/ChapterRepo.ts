@@ -1,19 +1,16 @@
 import { EntityManager } from 'typeorm'
 import { Result } from '../../../core'
-import { GetChapterResponse } from '../useCases/getChapter/GetChapterResponse'
 import { GetChapterParams } from '../useCases/getChapter/GetChapterParams'
 import { Chapter } from '../../../infra/db/entity/Chapter'
 import { Book } from '../../../infra/db/entity/Book'
-import { BookMap, ChapterMap, ParagraphMap } from '../mappers'
-import { Paragraph } from '../../../infra/db/entity/Paragraph'
-import { BookChapterDTO } from '../useCases/createBilingual/CreateBilingualDTO'
-import { BookDomain, ChapterDomain, ParagraphDomain } from '../domain'
-import { Users } from '../../../infra'
+import { ChapterMap } from '../mappers'
+import { ChapterDomain } from '../domain'
 
 export interface IChapterRepo {
-	getChapterByParamsQuery(userID: string, params: GetChapterParams): Promise<Result<GetChapterResponse>>
-	getChapterByIdQuery(id: number): Promise<Result<ChapterDomain>>
-	getLastChapterQuery(bookId: number): Promise<Result<ChapterDomain>>
+	getChaptersByParamsQuery(userID: number, params: GetChapterParams): Promise<Result<ChapterDomain[]>>
+	getChapterCountQuery(bookId: number, userId: number): Promise<Result<number>>
+	getFirstChapterQuery(bookId: number, userId: number): Promise<Result<ChapterDomain>>
+	getLastChapterQuery(bookId: number, userId: number): Promise<Result<ChapterDomain>>
 	saveCommand(chapter: ChapterDomain, book: Book): Promise<Result>
 }
 export class ChapterRepo implements IChapterRepo {
@@ -24,42 +21,20 @@ export class ChapterRepo implements IChapterRepo {
 	}
 
 	public async saveCommand(chapter: ChapterDomain, book: Book): Promise<Result> {
-		const { db } = this
-		const queryRunner = db.connection.createQueryRunner()
 		try {
-			await queryRunner.connect()
-			await queryRunner.startTransaction()
-
 			await this.repo.save({ book, ...ChapterMap.toDb(chapter) })
-
-			await queryRunner.commitTransaction()
 
 			return Result.ok()
 		} catch (e) {
 			console.log(e)
-			await queryRunner.rollbackTransaction()
 			return Result.fail(e)
-		} finally {
-			await queryRunner.release()
 		}
 	}
 
-	public async getChapterByIdQuery(id: number): Promise<Result<ChapterDomain>> {
+	public async getLastChapterQuery(bookId: number, userId: number): Promise<Result<ChapterDomain>> {
 		try {
 			const item = await this.repo.findOne({
-				where: { id },
-			})
-
-			return Result.ok<ChapterDomain>(ChapterMap.toDomain(item))
-		} catch (e) {
-			return Result.fail<ChapterDomain>(e)
-		}
-	}
-
-	public async getLastChapterQuery(bookId: number): Promise<Result<ChapterDomain>> {
-		try {
-			const item = await this.repo.findOne({
-				where: { book: { id: bookId } },
+				where: { book: { id: bookId, user: { id: userId } } },
 				order: { id: 'DESC' },
 			})
 
@@ -69,42 +44,48 @@ export class ChapterRepo implements IChapterRepo {
 		}
 	}
 
-	public async getChapterByParamsQuery(userID: string, params: GetChapterParams) {
-		const { manager } = this.db.connection
-
+	public async getFirstChapterQuery(bookId: number, userId: number): Promise<Result<ChapterDomain>> {
 		try {
-			const chapterRepo = manager.getRepository(Chapter)
+			const res = await this.repo.findOne({
+				where: {
+					book: { id: bookId, user: { id: userId } },
+				},
+			})
 
-			const res = await Promise.all([
-				chapterRepo.find({
-					where: {
-						id: params.id ? +params.id : params.getFindOperatorByKey('id'),
-						book: { id: +params.book_id, user: { id: +userID } },
-					},
-					skip: +params.skip,
-					take: +params.take,
-				}),
-				chapterRepo.count({
-					where: {
-						book: { id: +params.book_id, user: { id: +userID } },
-					},
-				}),
-				chapterRepo.findOne({
-					where: {
-						book: { id: +params.book_id, user: { id: +userID } },
-					},
-				}),
-				chapterRepo.findOne({
-					where: {
-						book: { id: +params.book_id, user: { id: +userID } },
-					},
-					order: { id: 'DESC' },
-				}),
-			])
-
-			return Result.ok<GetChapterResponse>(new GetChapterResponse(res[0], res[1], res[2], res[3]))
+			return Result.ok<ChapterDomain>(ChapterMap.toDomain(res))
 		} catch (e) {
-			return Result.fail<GetChapterResponse>(e)
+			return Result.fail<ChapterDomain>(e)
+		}
+	}
+
+	public async getChaptersByParamsQuery(userID: number, params: GetChapterParams) {
+		try {
+			const res = await this.repo.find({
+				where: {
+					id: params.id ? +params.id : params.getFindOperatorByKey('id'),
+					book: { id: +params.book_id, user: { id: userID } },
+				},
+				skip: +params.skip,
+				take: +params.take,
+			})
+
+			return Result.ok<ChapterDomain[]>(res.map((item) => ChapterMap.toDomain(item)))
+		} catch (e) {
+			return Result.fail<ChapterDomain[]>(e)
+		}
+	}
+
+	public async getChapterCountQuery(bookId: number, userId: number): Promise<Result<number>> {
+		try {
+			const count = await this.repo.count({
+				where: {
+					book: { id: bookId, user: { id: userId } },
+				},
+			})
+
+			return Result.ok<number>(count)
+		} catch (e) {
+			return Result.fail<number>(e)
 		}
 	}
 }

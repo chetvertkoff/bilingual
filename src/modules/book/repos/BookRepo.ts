@@ -9,9 +9,9 @@ import { BaseRepo, IBaseRepo } from '../../../core/infra'
 export interface IBookRepo extends IBaseRepo {
 	saveCommand(book: BookDomain, user: Users): Promise<Result>
 	getLastBookQuery(userId: number): Promise<Result<BookDomain>>
-	getBookByIdQuery(bookId: number): Promise<Result<BookDomain>>
-	getBilingualItem(id: string, userId: string): Promise<Result<Book>>
-	getBilingualItems(userId: string): Promise<Result<Book[]>>
+	getBookByIdQuery(bookId: number, userId: number): Promise<Result<BookDomain>>
+	getBookItemsByUserIdQuery(userId: string): Promise<Result<BookDomain[]>>
+	getBookItemCountByUserIdQuery(userId: string): Promise<Result<number>>
 }
 
 export class BookRepo extends BaseRepo implements IBookRepo {
@@ -47,10 +47,10 @@ export class BookRepo extends BaseRepo implements IBookRepo {
 		}
 	}
 
-	public async getBookByIdQuery(bookId: number): Promise<Result<BookDomain>> {
+	public async getBookByIdQuery(bookId: number, userId: number): Promise<Result<BookDomain>> {
 		try {
 			const item = await this.repo.findOne({
-				where: { id: bookId },
+				where: { id: bookId, user: { id: userId } },
 			})
 
 			return Result.ok<BookDomain>(BookMap.toDomain(item))
@@ -59,32 +59,25 @@ export class BookRepo extends BaseRepo implements IBookRepo {
 		}
 	}
 
-	public async getBilingualItem(id: string, userId: string) {
-		const { manager } = this.db.connection
-
+	public async getBookItemsByUserIdQuery(userId: string) {
 		try {
-			const bookRepo = manager.getRepository(Book)
-			const item = await bookRepo.findOne({
-				where: { id: +id, user: { id: +userId } },
+			const items = await this.repo.find({
+				where: { user: { id: +userId } },
 			})
-
-			return Result.ok<Book>(item)
+			return Result.ok<BookDomain[]>(items.map((item) => BookMap.toDomain(item)))
 		} catch (e) {
-			return Result.fail<Book>(e)
+			return Result.fail<BookDomain[]>(e)
 		}
 	}
 
-	public async getBilingualItems(userId: string) {
-		const { manager } = this.db.connection
-
+	public async getBookItemCountByUserIdQuery(userId: string): Promise<Result<number>> {
 		try {
-			const bookRepo = manager.getRepository(Book)
-			const items = await bookRepo.find({
+			const count = await this.repo.count({
 				where: { user: { id: +userId } },
 			})
-			return Result.ok<Book[]>(items)
+			return Result.ok<number>(count)
 		} catch (e) {
-			return Result.fail<Book[]>(e)
+			return Result.fail<number>(e)
 		}
 	}
 }

@@ -6,12 +6,11 @@ interface BookProps extends BaseDomainProps {
 }
 
 export class BookDomain extends BaseDomain<BookProps> {
-	get loading() {
-		return this.props.loading
-	}
+	public loading: boolean
 
 	private constructor(props: BookProps) {
 		super(props)
+		this.loading = props.loading
 	}
 
 	public static create(props: BookProps) {

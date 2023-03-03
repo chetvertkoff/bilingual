@@ -2,9 +2,7 @@ import { LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual } from 'typeorm'
 
 export interface BaseParamsProps {
 	id?: string
-
 	skip?: string
-
 	take?: string
 	order?: 'ASC' | 'DESC'
 }

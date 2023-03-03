@@ -38,7 +38,7 @@ export class SaveChaptersService implements ISaveChaptersService {
 	}
 
 	public async saveChaptersWithParagraphs(userId: number, bookId: number, chapters: ChapterDomain[]): Promise<Result> {
-		const bookRes = await this.bookRepo.getBookByIdQuery(bookId)
+		const bookRes = await this.bookRepo.getBookByIdQuery(bookId, userId)
 		if (!bookRes.success) return Result.fail()
 
 		await this.bookRepo.startTransaction()
@@ -50,7 +50,7 @@ export class SaveChaptersService implements ISaveChaptersService {
 				return Result.fail()
 			}
 
-			const chapterRes = await this.chapterRepo.getLastChapterQuery(bookId)
+			const chapterRes = await this.chapterRepo.getLastChapterQuery(bookId, userId)
 			if (!chapterRes.success) {
 				await this.bookRepo.rollBackTransaction()
 				return Result.fail()
