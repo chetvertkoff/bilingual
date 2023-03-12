@@ -12,7 +12,9 @@ export class GetBookController extends BaseController {
 				id: this.req.params.id,
 				userId: +this.userId,
 			})
-			return this.ok(this.res, res)
+
+			if (!res.success) return this.fail(res.error, res.errorCode)
+			return this.ok(this.res, res.value)
 		} catch (e) {
 			return this.fail(e)
 		}

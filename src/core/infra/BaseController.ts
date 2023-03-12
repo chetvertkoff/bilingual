@@ -57,7 +57,7 @@ export abstract class BaseController {
 		return res.status(200).json(dto ?? new SimpleResponse())
 	}
 
-	public fail(error: Error | string) {
-		return this.res.status(500).json(new AppError.UnknownError(JSON.stringify(error)))
+	public fail(error: Error | string, code = 500) {
+		return this.res.status(code).json(new AppError.UnknownError(JSON.stringify(error)))
 	}
 }

@@ -13,7 +13,7 @@ export class GetChapterController extends BaseController {
 				userId: this.userId,
 				params: new GetChapterParams(this.req.query),
 			})
-			if (!res.success) return this.fail(res.error)
+			if (!res.success) return this.fail(res.error, res.errorCode)
 			return this.ok(this.res, res)
 		} catch (e) {
 			return this.fail(e)

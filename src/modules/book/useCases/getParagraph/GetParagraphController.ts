@@ -13,7 +13,7 @@ export class GetParagraphController extends BaseController {
 				userId: this.userId,
 				params: new GetParagraphParams(this.req.query),
 			})
-			if (!res.success) return this.fail(res.error)
+			if (!res.success) return this.fail(res.error, res.errorCode)
 			return this.ok(this.res, res)
 		} catch (e) {
 			return this.fail(e)
