@@ -2,13 +2,15 @@ import { EntityManager } from 'typeorm'
 import { Paragraph } from '../../../infra/db/entity/Paragraph'
 import { Result } from '../../../core'
 import { GetParagraphParams } from '../useCases/getParagraph/GetParagraphParams'
-import { GetParagraphResponse } from '../useCases/getParagraph/GetParagraphResponse'
 import { ParagraphDomain } from '../domain'
 import { ParagraphMap } from '../mappers'
 import { Chapter } from '../../../infra'
 
 export interface IParagraphRepo {
-	getParagraphByParamsQuery(userID: string, params: GetParagraphParams): Promise<Result<GetParagraphResponse>>
+	getLastParagraphQuery(userID: number, bookId: number, chapterId: number): Promise<Result<ParagraphDomain>>
+	getFirstParagraphQuery(userID: number, bookId: number, chapterId: number): Promise<Result<ParagraphDomain>>
+	getParagraphCountQuery(userID: number, bookId: number, chapterId: number): Promise<Result<number>>
+	getParagraphItemsByParamsQuery(userID: number, params: GetParagraphParams): Promise<Result<ParagraphDomain[]>>
 	getParagraphByIdQuery(id: number): Promise<Result<ParagraphDomain>>
 	saveCommand(paragraph: ParagraphDomain, chapter: Chapter): Promise<Result>
 }
@@ -19,54 +21,83 @@ export class ParagraphRepo implements IParagraphRepo {
 		return this.db.connection.manager.getRepository(Paragraph)
 	}
 
-	public async getParagraphByParamsQuery(userID: string, params: GetParagraphParams) {
-		const { manager } = this.db.connection
-
+	public async getLastParagraphQuery(
+		userID: number,
+		bookId: number,
+		chapterId: number
+	): Promise<Result<ParagraphDomain>> {
 		try {
-			const paragraphRepo = manager.getRepository(Paragraph)
+			const res = await this.repo.findOne({
+				where: {
+					chapter: {
+						id: chapterId,
+						book: { id: bookId, user: { id: +userID } },
+					},
+				},
+				order: { id: 'DESC' },
+			})
 
-			const res = await Promise.all([
-				paragraphRepo.find({
-					where: {
-						id: params.id ? +params.id : params.getFindOperatorByKey('id'),
-						chapter: {
-							id: +params.chapter_id,
-							book: { id: +params.book_id, user: { id: +userID } },
-						},
-					},
-					skip: +params.skip,
-					take: +params.take,
-				}),
-				paragraphRepo.count({
-					where: {
-						chapter: {
-							id: +params.chapter_id,
-							book: { id: +params.book_id, user: { id: +userID } },
-						},
-					},
-				}),
-				paragraphRepo.findOne({
-					where: {
-						chapter: {
-							id: +params.chapter_id,
-							book: { id: +params.book_id, user: { id: +userID } },
-						},
-					},
-				}),
-				paragraphRepo.findOne({
-					where: {
-						chapter: {
-							id: +params.chapter_id,
-							book: { id: +params.book_id, user: { id: +userID } },
-						},
-					},
-					order: { id: 'DESC' },
-				}),
-			])
-
-			return Result.ok<GetParagraphResponse>(new GetParagraphResponse(res[0], res[1], res[2], res[3]))
+			return Result.ok<ParagraphDomain>(ParagraphMap.toDomain(res))
 		} catch (e) {
-			return Result.fail<GetParagraphResponse>(e)
+			return Result.fail<ParagraphDomain>(e)
+		}
+	}
+
+	public async getFirstParagraphQuery(
+		userID: number,
+		bookId: number,
+		chapterId: number
+	): Promise<Result<ParagraphDomain>> {
+		try {
+			const res = await this.repo.findOne({
+				where: {
+					chapter: {
+						id: chapterId,
+						book: { id: bookId, user: { id: userID } },
+					},
+				},
+			})
+
+			return Result.ok<ParagraphDomain>(ParagraphMap.toDomain(res))
+		} catch (e) {
+			return Result.fail<ParagraphDomain>(e)
+		}
+	}
+
+	public async getParagraphCountQuery(userID: number, bookId: number, chapterId: number) {
+		try {
+			const res = await this.repo.count({
+				where: {
+					chapter: {
+						id: chapterId,
+						book: { id: bookId, user: { id: userID } },
+					},
+				},
+			})
+
+			return Result.ok<number>(res)
+		} catch (e) {
+			return Result.fail<number>(e)
+		}
+	}
+
+	public async getParagraphItemsByParamsQuery(userID: number, params: GetParagraphParams) {
+		try {
+			const res = await this.repo.find({
+				where: {
+					id: params.id ? +params.id : params.getFindOperatorByKey('id'),
+					chapter: {
+						id: +params.chapter_id,
+						book: { id: +params.book_id, user: { id: userID } },
+					},
+				},
+				skip: +params.skip,
+				take: +params.take,
+			})
+
+			return Result.ok<ParagraphDomain[]>(res.map((item) => ParagraphMap.toDomain(item)))
+		} catch (e) {
+			return Result.fail<ParagraphDomain[]>(e)
 		}
 	}
 

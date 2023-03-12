@@ -8,7 +8,7 @@ interface Props {
 	userId: number
 	id: string
 }
-export class GetBookUseCase implements UseCase<Props, Promise<Result<BookDomain> | GetBilingualError.BookQueryError>> {
+export class GetBookUseCase implements UseCase<Props, Promise<GetBilingualError.BookQueryError | Result<BookDomain>>> {
 	constructor(private bookRepo: IBookRepo) {}
 
 	public async execute({ id, userId }: Props) {

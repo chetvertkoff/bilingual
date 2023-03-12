@@ -10,6 +10,7 @@ export class GetBookController extends BaseController {
 		try {
 			const res = await this.getBookUseCase.execute({
 				id: this.req.params.id,
+				userId: +this.userId,
 			})
 			return this.ok(this.res, res)
 		} catch (e) {
