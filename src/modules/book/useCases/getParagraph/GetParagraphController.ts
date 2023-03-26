@@ -14,7 +14,7 @@ export class GetParagraphController extends BaseController {
 				params: new GetParagraphParams(this.req.query),
 			})
 			if (!res.success) return this.fail(res.error, res.errorCode)
-			return this.ok(this.res, res)
+			return this.ok(this.res, res.value)
 		} catch (e) {
 			return this.fail(e)
 		}

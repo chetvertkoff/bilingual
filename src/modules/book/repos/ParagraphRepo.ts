@@ -7,9 +7,9 @@ import { ParagraphMap } from '../mappers'
 import { Chapter } from '../../../infra'
 
 export interface IParagraphRepo {
-	getLastParagraphQuery(userID: number, bookId: number, chapterId: number): Promise<Result<ParagraphDomain>>
-	getFirstParagraphQuery(userID: number, bookId: number, chapterId: number): Promise<Result<ParagraphDomain>>
-	getParagraphCountQuery(userID: number, bookId: number, chapterId: number): Promise<Result<number>>
+	getLastParagraphQuery(userID: number, bookId: number, chapterId?: number): Promise<Result<ParagraphDomain>>
+	getFirstParagraphQuery(userID: number, bookId: number, chapterId?: number): Promise<Result<ParagraphDomain>>
+	getParagraphCountQuery(userID: number, bookId: number): Promise<Result<number>>
 	getParagraphItemsByParamsQuery(userID: number, params: GetParagraphParams): Promise<Result<ParagraphDomain[]>>
 	getParagraphByIdQuery(id: number): Promise<Result<ParagraphDomain>>
 	saveCommand(paragraph: ParagraphDomain, chapter: Chapter): Promise<Result>
@@ -24,13 +24,13 @@ export class ParagraphRepo implements IParagraphRepo {
 	public async getLastParagraphQuery(
 		userID: number,
 		bookId: number,
-		chapterId: number
+		chapterId?: number
 	): Promise<Result<ParagraphDomain>> {
 		try {
 			const res = await this.repo.findOne({
 				where: {
 					chapter: {
-						id: chapterId,
+						...(chapterId ? { id: chapterId } : {}),
 						book: { id: bookId, user: { id: +userID } },
 					},
 				},
@@ -46,13 +46,13 @@ export class ParagraphRepo implements IParagraphRepo {
 	public async getFirstParagraphQuery(
 		userID: number,
 		bookId: number,
-		chapterId: number
+		chapterId?: number
 	): Promise<Result<ParagraphDomain>> {
 		try {
 			const res = await this.repo.findOne({
 				where: {
 					chapter: {
-						id: chapterId,
+						...(chapterId ? { id: chapterId } : {}),
 						book: { id: bookId, user: { id: userID } },
 					},
 				},
@@ -64,12 +64,11 @@ export class ParagraphRepo implements IParagraphRepo {
 		}
 	}
 
-	public async getParagraphCountQuery(userID: number, bookId: number, chapterId: number) {
+	public async getParagraphCountQuery(userID: number, bookId: number) {
 		try {
 			const res = await this.repo.count({
 				where: {
 					chapter: {
-						id: chapterId,
 						book: { id: bookId, user: { id: userID } },
 					},
 				},
@@ -82,13 +81,18 @@ export class ParagraphRepo implements IParagraphRepo {
 	}
 
 	public async getParagraphItemsByParamsQuery(userID: number, params: GetParagraphParams) {
+		const id =
+			params.id || params.getFindOperatorByKey('id')
+				? { id: params.id ? +params.id : params.getFindOperatorByKey('id') }
+				: {}
+
 		try {
 			const res = await this.repo.find({
 				where: {
-					id: params.id ? +params.id : params.getFindOperatorByKey('id'),
+					...(id as { id: number }),
 					chapter: {
-						id: +params.chapter_id,
-						book: { id: +params.book_id, user: { id: userID } },
+						...(params.book_id ? { book: { id: +params.book_id, user: { id: userID } } } : {}),
+						...(params.chapter_id ? { id: +params.chapter_id } : {}),
 					},
 				},
 				skip: +params.skip,
