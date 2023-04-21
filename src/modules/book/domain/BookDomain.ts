@@ -2,15 +2,15 @@ import { BaseDomain } from '../../../core'
 import { BaseDomainProps } from '../../../core/domain/BaseDomainProps'
 
 interface BookProps extends BaseDomainProps {
-	loading: boolean
+	progress: number
 }
 
 export class BookDomain extends BaseDomain<BookProps> {
-	public loading: boolean
+	public progress: number
 
 	private constructor(props: BookProps) {
 		super(props)
-		this.loading = props.loading
+		this.progress = props.progress
 	}
 
 	public static create(props: BookProps) {

@@ -10,7 +10,6 @@ export interface ISaveChaptersService {
 	getNewBook(userId: number): Promise<Result<BookDomain>>
 	saveChaptersWithParagraphs(userId: number, bookId: number, chapters: ChapterDomain[]): Promise<Result>
 }
-// попробоававть траснзакции прямо здесь
 export class SaveChaptersService implements ISaveChaptersService {
 	constructor(
 		private userRepo: IUserRepo,
@@ -24,7 +23,7 @@ export class SaveChaptersService implements ISaveChaptersService {
 		if (!user.success) return Result.fail()
 
 		await this.bookRepo.startTransaction()
-		const bookSaveRes = await this.bookRepo.saveCommand(BookDomain.create({ loading: true }), UserMap.toDb(user.value))
+		const bookSaveRes = await this.bookRepo.saveCommand(BookDomain.create({ progress: 1 }), UserMap.toDb(user.value))
 
 		if (!bookSaveRes.success) {
 			await this.bookRepo.rollBackTransaction()
@@ -72,7 +71,7 @@ export class SaveChaptersService implements ISaveChaptersService {
 		}
 
 		const bookSaveRes = await this.bookRepo.saveCommand(
-			BookDomain.create({ id: bookId, loading: false }),
+			BookDomain.create({ id: bookId, progress: null }),
 			UserMap.toDb(user.value)
 		)
 		if (!bookSaveRes.success) {

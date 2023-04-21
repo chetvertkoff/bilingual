@@ -5,6 +5,7 @@ import * as DTO from './CreateBilingualDTO'
 import { notify } from '../../../../infra/ws'
 import { saveChaptersService } from './services'
 import { observer } from '../../../../core/infra'
+import { bookRepo, userRepo } from '../../repos'
 
 const createBilingualUseCase = new CreateBilingualUseCase(
 	bookReaderService,
@@ -12,7 +13,9 @@ const createBilingualUseCase = new CreateBilingualUseCase(
 	translateService,
 	notify,
 	saveChaptersService,
-	observer
+	observer,
+	bookRepo,
+	userRepo
 )
 const createBilingualController = new CreateBilingualController(createBilingualUseCase)
 

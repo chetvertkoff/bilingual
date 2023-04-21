@@ -6,9 +6,8 @@ export class BookMap {
 		const book = new Book()
 
 		book.id = bookDomain.id
-		book.loading = bookDomain.loading
+		book.progress = bookDomain.progress
 		book.createdDate = bookDomain.createdDate
-		console.log('book', book)
 		return book
 	}
 

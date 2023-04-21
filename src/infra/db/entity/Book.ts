@@ -11,7 +11,7 @@ export class Book extends BaseEntity {
 	@Column({
 		nullable: true,
 	})
-	loading: boolean
+	progress: number
 
 	@OneToMany(() => Chapter, (chapter) => chapter.book)
 	chapters: Chapter[]

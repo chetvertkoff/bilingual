@@ -23,14 +23,25 @@ export class Notifier {
 			client.on('close', () => {
 				if (this.clients.has(userId)) this.clients.delete(userId)
 			})
-		} catch (e) {}
+
+			client.on('message', (data) => {
+				const message = data.toString()
+				if (message === 'pong') {
+					this.send(userId, Result.ok(new WsResponse(WsEvents.PING, String(Math.random()))))
+				}
+			})
+		} catch (e) {
+			console.log('addClient', e)
+		}
 	}
 
 	public async send(userId: string, message: Result<UseCaseError | WsResponse>) {
 		try {
 			if (!this.clients.has(userId)) return
 			this.clients.get(userId)?.(JSON.stringify(message))
-		} catch (e) {}
+		} catch (e) {
+			console.log('send', e)
+		}
 	}
 
 	private getParamsFromUrl(url: string): Params {

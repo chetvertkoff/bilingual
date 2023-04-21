@@ -15,7 +15,6 @@ export class GetParagraphUseCase
 	constructor(private paragraphRepo: IParagraphRepo) {}
 
 	async execute({ userId, params }: Props) {
-		console.log(params)
 		const res = await Promise.all([
 			this.paragraphRepo.getParagraphItemsByParamsQuery(+userId, params),
 			this.paragraphRepo.getParagraphCountQuery(+userId, +params.book_id),
