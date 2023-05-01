@@ -138,6 +138,6 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 			return
 		}
 
-		this.notify.send(userId, Result.ok(new WsResponse(WsEvents.BOOKS_REQUEST)))
+		this.notify.send(userId, Result.ok(new WsResponse(WsEvents.BOOK_TRANSLATED)))
 	}
 }

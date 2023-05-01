@@ -4,13 +4,13 @@ import { Book } from '../../../infra/db/entity/Book'
 import { BookMap } from '../mappers/BookMap'
 import { Result } from '../../../core/helpers/Result'
 import { BookDomain } from '../domain'
-import { BaseRepo, IBaseRepo } from '../../../core/infra'
+import { BaseParams, BaseRepo, IBaseRepo } from '../../../core/infra'
 
 export interface IBookRepo extends IBaseRepo {
 	saveCommand(book: BookDomain, user: Users): Promise<Result>
 	getLastBookQuery(userId: number): Promise<Result<BookDomain>>
 	getBookByIdQuery(bookId: number, userId: number): Promise<Result<BookDomain>>
-	getBookItemsByUserIdQuery(userId: string): Promise<Result<BookDomain[]>>
+	getBookItemsByUserIdQuery(userId: string, params: BaseParams): Promise<Result<BookDomain[]>>
 	getBookItemCountByUserIdQuery(userId: string): Promise<Result<number>>
 }
 
@@ -59,10 +59,14 @@ export class BookRepo extends BaseRepo implements IBookRepo {
 		}
 	}
 
-	public async getBookItemsByUserIdQuery(userId: string) {
+	public async getBookItemsByUserIdQuery(userId: string, params: BaseParams) {
 		try {
+			console.log(params)
 			const items = await this.repo.find({
 				where: { user: { id: +userId } },
+				order: { id: params.order },
+				skip: +params.skip,
+				take: +params.take,
 			})
 			return Result.ok<BookDomain[]>(items.map((item) => BookMap.toDomain(item)))
 		} catch (e) {

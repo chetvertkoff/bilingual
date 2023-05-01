@@ -21,6 +21,7 @@ export class Notifier {
 			this.send(userId, Result.ok(new WsResponse(WsEvents.WELCOME)))
 
 			client.on('close', () => {
+				console.log('close')
 				if (this.clients.has(userId)) this.clients.delete(userId)
 			})
 
@@ -38,7 +39,9 @@ export class Notifier {
 	public async send(userId: string, message: Result<UseCaseError | WsResponse>) {
 		try {
 			if (!this.clients.has(userId)) return
-			this.clients.get(userId)?.(JSON.stringify(message))
+			setTimeout(() => {
+				this.clients.get(userId)?.(JSON.stringify(message))
+			}, 0)
 		} catch (e) {
 			console.log('send', e)
 		}

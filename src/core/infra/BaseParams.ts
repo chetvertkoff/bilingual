@@ -20,8 +20,8 @@ export class BaseParams {
 	public readonly take?: string
 	public readonly order?: 'ASC' | 'DESC'
 
-	constructor(props: BaseParamsProps) {
-		this.id = props.id
+	constructor(props: BaseParamsProps = {}) {
+		if (props?.id) this.id = props.id
 		this.skip = props.skip ?? '0'
 		this.take = props.take ?? '30'
 		this.order = props.order ?? 'ASC'

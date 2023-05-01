@@ -3,19 +3,20 @@ import { IBookRepo } from '../../repos/BookRepo'
 import { GetBilingualItemsError } from './GetBookItemsError'
 import { Result } from '../../../../core'
 import { BookDomain } from '../../domain'
-import { BaseResponseCatalog } from '../../../../core/infra'
+import { BaseParams, BaseResponseCatalog } from '../../../../core/infra'
 
 interface Props {
 	userId: string
+	params: BaseParams
 }
 export class GetBookItemsUseCase
 	implements UseCase<Props, Promise<Result<BaseResponseCatalog<BookDomain>> | GetBilingualItemsError.BookQueryError>>
 {
 	constructor(private bookRepo: IBookRepo) {}
 
-	public async execute({ userId }: Props) {
+	public async execute({ userId, params }: Props) {
 		const [itemResult, itemCountResult] = await Promise.all([
-			this.bookRepo.getBookItemsByUserIdQuery(userId),
+			this.bookRepo.getBookItemsByUserIdQuery(userId, new BaseParams(params)),
 			this.bookRepo.getBookItemCountByUserIdQuery(userId),
 		])
 

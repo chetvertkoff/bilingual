@@ -1,5 +1,6 @@
 import { BaseController } from '../../../../core/infra/BaseController'
 import { GetBookItemsUseCase } from './GetBookItemsUseCase'
+import { BaseParams } from '../../../../core/infra'
 
 export class GetBookItemsController extends BaseController {
 	constructor(private getBookItemsUseCase: GetBookItemsUseCase) {
@@ -10,6 +11,7 @@ export class GetBookItemsController extends BaseController {
 		try {
 			const res = await this.getBookItemsUseCase.execute({
 				userId: this.userId,
+				params: new BaseParams(this.req.query),
 			})
 
 			if (!res.success) return this.fail(res.error, res.errorCode)
