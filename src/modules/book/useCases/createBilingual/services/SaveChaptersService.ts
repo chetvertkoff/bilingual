@@ -71,7 +71,7 @@ export class SaveChaptersService implements ISaveChaptersService {
 		}
 
 		const bookSaveRes = await this.bookRepo.saveCommand(
-			BookDomain.create({ id: bookId, progress: null }),
+			BookDomain.create({ ...bookRes.value, id: bookId, progress: null }),
 			UserMap.toDb(user.value)
 		)
 		if (!bookSaveRes.success) {

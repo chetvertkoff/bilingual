@@ -7,7 +7,10 @@ export interface BookReaderResultDTO {
 	html: string
 }
 
-export type BookReaderResult = Array<Promise<BookReaderResultDTO>>
+export interface BookReaderResult {
+	chapters: Array<Promise<BookReaderResultDTO>>
+	cover: Buffer
+}
 
 export interface IBookReaderService {
 	execute(bookPath: string): Promise<Result<BookReaderResult>>

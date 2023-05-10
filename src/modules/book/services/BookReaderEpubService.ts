@@ -6,12 +6,15 @@ export class BookReaderEpubService implements IBookReaderService {
 	public async execute(bookPath: string): Promise<Result<BookReaderResult>> {
 		try {
 			const epub = await EPub.createAsync(bookPath)
-			const parsedBook = epub.flow
+			const imgs = epub.listImage()
+			const buf = imgs[0]?.id ? await epub.getImageAsync(imgs[0]?.id) : null
+			const chapters = epub.flow
 				.map(({ id }) => id && this.getChapter(id, epub))
 				.filter((chapter) => chapter) as Promise<BookReaderResultDTO>[]
-			return Result.ok<Promise<BookReaderResultDTO>[]>(parsedBook)
+
+			return Result.ok<BookReaderResult>({ chapters, cover: buf?.data ?? null })
 		} catch (e) {
-			return Result.fail<Promise<BookReaderResultDTO>[]>(e)
+			return Result.fail<BookReaderResult>(e)
 		}
 	}
 

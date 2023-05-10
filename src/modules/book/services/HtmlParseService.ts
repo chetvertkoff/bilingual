@@ -13,12 +13,13 @@ export interface HtmlParserResultDTO {
 }
 
 export interface IHtmlParseService {
-	execute(chapter: BookReaderResult): Promise<Result<HtmlParserResultDTO[]>>
+	execute(book: BookReaderResult): Promise<Result<HtmlParserResultDTO[]>>
 }
 
 export class HtmlParseService implements IHtmlParseService {
-	public async execute(chapters: BookReaderResult): Promise<Result<HtmlParserResultDTO[]>> {
+	public async execute(book: BookReaderResult): Promise<Result<HtmlParserResultDTO[]>> {
 		try {
+			const { chapters } = book
 			const res = await Promise.all(chapters.map(async (ch) => this.parseBook(await ch)))
 			return Result.ok<HtmlParserResultDTO[]>(res.filter((chapter) => chapter))
 		} catch (e) {

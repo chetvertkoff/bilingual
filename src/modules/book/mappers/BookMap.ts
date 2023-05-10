@@ -8,6 +8,7 @@ export class BookMap {
 		book.id = bookDomain.id
 		book.progress = bookDomain.progress
 		book.createdDate = bookDomain.createdDate
+		book.cover = bookDomain.cover
 		return book
 	}
 

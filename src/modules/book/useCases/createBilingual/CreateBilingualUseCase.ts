@@ -9,7 +9,7 @@ import { IObserver, WsResponse } from '../../../../core/infra'
 import { WsEvents } from '../../../../core/constants'
 import { ISaveChaptersService } from './services/SaveChaptersService'
 import { CreateBilingualObserverEvents } from './constants'
-import { BookDomain, ChapterDomain } from '../../domain'
+import { BookDomain, ChapterDomain, UserDomain } from '../../domain'
 import { IBookRepo } from '../../repos/BookRepo'
 import { UserMap } from '../../mappers'
 import { IUserRepo } from '../../repos/UserRepo'
@@ -24,11 +24,12 @@ interface CreateBookProps extends Props {
 }
 
 interface ParseBookProps extends CreateBookProps {
-	bookId: number
+	book: BookDomain
 }
 
 interface TranslateBookProps extends ParseBookProps {
 	parsedBook: Result<HtmlParserResultDTO[]>
+	user: UserDomain
 }
 interface SaveBookProps extends ParseBookProps {
 	translatedChapters: Result<ChapterDomain[]>
@@ -65,36 +66,40 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 			return
 		}
 
-		this.notify.send(userId, Result.ok(new WsResponse(WsEvents.BOOKS_REQUEST)))
+		this.notify.send(userId, Result.ok(new WsResponse(WsEvents.BOOKS_REQUEST, { bookId: bookRes.value.id })))
 
-		const bookId = bookRes.value.id
-
-		await this.parseBook({ ...props, bookId })
+		await this.parseBook({ ...props, book: bookRes.value })
 	}
 
 	private async parseBook(props: ParseBookProps) {
-		const { bookPath, userId } = props
-		const bookChaptersBody = await this.bookReader.execute(bookPath)
-		if (!bookChaptersBody.success) {
+		const { bookPath, userId, book: bookDomain } = props
+		const book = await this.bookReader.execute(bookPath)
+		const user = await this.userRepo.getUserByIdQuery(+userId)
+
+		if (!book.success || !user.success) {
 			this.notify.send(userId, new CreateBilingualError.BookParseError())
 			return
 		}
+		if (book.value.cover)
+			await this.bookRepo.saveCommand(
+				BookDomain.create({ ...bookDomain, cover: book.value.cover.toString('base64') }),
+				UserMap.toDb(user.value)
+			)
 
-		const parsedBook = await this.htmlParser.execute(bookChaptersBody.value)
+		const parsedBook = await this.htmlParser.execute(book.value)
 		if (!parsedBook.success) {
 			this.notify.send(userId, new CreateBilingualError.BookParseError())
 			return
 		}
 
-		await this.translateBook({ ...props, parsedBook })
+		await this.translateBook({ ...props, parsedBook, user: user.value })
 	}
 
 	private async translateBook(props: TranslateBookProps) {
-		const { eventId, parsedBook, userId, bookId } = props
-		const bookRes = await this.bookRepo.getBookByIdQuery(bookId, +userId)
-		const user = await this.userRepo.getUserByIdQuery(+userId)
+		const { eventId, parsedBook, userId, user, book } = props
+		const bookRes = await this.bookRepo.getBookByIdQuery(book.id, +userId)
 
-		if (!bookRes.success || !user.success) {
+		if (!bookRes.success) {
 			this.notify.send(userId, new CreateBilingualError.BookTranslateError())
 			return
 		}
@@ -105,10 +110,10 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 			const percent = Math.trunc((a / b) * 90)
 			this.notify.send(
 				userId,
-				Result.ok(new WsResponse(WsEvents.TRANSLATE_BOOK_PROGRESS, { progress: percent, bookId }))
+				Result.ok(new WsResponse(WsEvents.TRANSLATE_BOOK_PROGRESS, { progress: percent, bookId: book.id }))
 			)
 
-			this.bookRepo.saveCommand(BookDomain.create({ ...bookRes.value, progress: percent }), UserMap.toDb(user.value))
+			this.bookRepo.saveCommand(BookDomain.create({ ...bookRes.value, progress: percent }), UserMap.toDb(user))
 		})
 
 		const translatedChapters = await this.translater.execute(eventId, parsedBook.value)
@@ -120,17 +125,17 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 
 		await this.notify.send(
 			userId,
-			Result.ok(new WsResponse(WsEvents.TRANSLATE_BOOK_PROGRESS, { progress: 95, bookId }))
+			Result.ok(new WsResponse(WsEvents.TRANSLATE_BOOK_PROGRESS, { progress: 95, bookId: book.id }))
 		)
-		await this.bookRepo.saveCommand(BookDomain.create({ ...bookRes.value, progress: 95 }), UserMap.toDb(user.value))
+		await this.bookRepo.saveCommand(BookDomain.create({ ...bookRes.value, progress: 95 }), UserMap.toDb(user))
 		await this.saveBook({ ...props, translatedChapters })
 	}
 
 	private async saveBook(props: SaveBookProps) {
-		const { userId, bookId, translatedChapters } = props
+		const { userId, book, translatedChapters } = props
 		const saveProgress = await this.saveChaptersService.saveChaptersWithParagraphs(
 			+userId,
-			bookId,
+			book.id,
 			translatedChapters.value
 		)
 		if (!saveProgress.success) {

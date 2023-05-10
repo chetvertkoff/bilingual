@@ -60,10 +60,13 @@ export class BookRepo extends BaseRepo implements IBookRepo {
 	}
 
 	public async getBookItemsByUserIdQuery(userId: string, params: BaseParams) {
+		const conditionsByParams = {
+			...(params?.id ? { id: +params?.id } : {}),
+		}
+
 		try {
-			console.log(params)
 			const items = await this.repo.find({
-				where: { user: { id: +userId } },
+				where: { user: { id: +userId }, ...conditionsByParams },
 				order: { id: params.order },
 				skip: +params.skip,
 				take: +params.take,

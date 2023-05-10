@@ -13,6 +13,11 @@ export class Book extends BaseEntity {
 	})
 	progress: number
 
+	@Column({
+		nullable: true,
+	})
+	cover: string
+
 	@OneToMany(() => Chapter, (chapter) => chapter.book)
 	chapters: Chapter[]
 }
