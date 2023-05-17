@@ -13,6 +13,7 @@ import { BookDomain, ChapterDomain, UserDomain } from '../../domain'
 import { IBookRepo } from '../../repos/BookRepo'
 import { UserMap } from '../../mappers'
 import { IUserRepo } from '../../repos/UserRepo'
+import { v4 as uuidv4 } from 'uuid'
 
 interface Props {
 	bookPath: string
@@ -48,9 +49,12 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 	) {}
 
 	public async execute({ userId, bookPath }: Props) {
-		const eventId = `${CreateBilingualObserverEvents.CHAPTER_TRANSLATE_PROGRESS}${userId}`
+		const eventId = `${CreateBilingualObserverEvents.CHAPTER_TRANSLATE_PROGRESS}${uuidv4()}`
 		try {
-			await this.createBook({ userId, bookPath, eventId })
+			const createBookProps = await this.createBook({ userId, bookPath, eventId })
+			const parseBookProps = await this.parseBook(createBookProps)
+			const translateBookProps = await this.translateBook(parseBookProps)
+			await this.saveBook(translateBookProps)
 		} catch (e) {
 			this.notify.send(userId, Result.fail(new Error()))
 		} finally {
@@ -66,9 +70,7 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 			return
 		}
 
-		this.notify.send(userId, Result.ok(new WsResponse(WsEvents.BOOKS_REQUEST, { bookId: bookRes.value.id })))
-
-		await this.parseBook({ ...props, book: bookRes.value })
+		return { ...props, book: bookRes.value }
 	}
 
 	private async parseBook(props: ParseBookProps) {
@@ -86,13 +88,15 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 				UserMap.toDb(user.value)
 			)
 
+		this.notify.send(userId, Result.ok(new WsResponse(WsEvents.BOOKS_REQUEST, { bookId: bookDomain.id })))
+
 		const parsedBook = await this.htmlParser.execute(book.value)
 		if (!parsedBook.success) {
 			this.notify.send(userId, new CreateBilingualError.BookParseError())
 			return
 		}
 
-		await this.translateBook({ ...props, parsedBook, user: user.value })
+		return { ...props, parsedBook, user: user.value }
 	}
 
 	private async translateBook(props: TranslateBookProps) {
@@ -115,7 +119,8 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 
 			this.bookRepo.saveCommand(BookDomain.create({ ...bookRes.value, progress: percent }), UserMap.toDb(user))
 		})
-
+		// @ts-ignore
+		console.log(this.observer.subscribers)
 		const translatedChapters = await this.translater.execute(eventId, parsedBook.value)
 
 		if (!translatedChapters.success) {
@@ -128,7 +133,8 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 			Result.ok(new WsResponse(WsEvents.TRANSLATE_BOOK_PROGRESS, { progress: 95, bookId: book.id }))
 		)
 		await this.bookRepo.saveCommand(BookDomain.create({ ...bookRes.value, progress: 95 }), UserMap.toDb(user))
-		await this.saveBook({ ...props, translatedChapters })
+
+		return { ...props, translatedChapters }
 	}
 
 	private async saveBook(props: SaveBookProps) {
