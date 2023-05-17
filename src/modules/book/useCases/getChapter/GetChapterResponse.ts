@@ -1,4 +1,4 @@
-import { BaseResponseCatalog } from '../../../../core/infra/BaseResponseCatalog'
+import { BaseResponseCatalog } from '../../../../shared/infra/BaseResponseCatalog'
 import { ChapterDomain } from '../../domain'
 
 export class GetChapterResponse extends BaseResponseCatalog<ChapterDomain> {

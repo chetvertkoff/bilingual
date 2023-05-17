@@ -1,4 +1,4 @@
-import { BaseController } from '../../../../core/infra/BaseController'
+import { BaseController } from '../../../../shared/infra/BaseController'
 import { GetChapterUseCase } from './GetChapterUseCase'
 import { GetChapterParams } from './GetChapterParams'
 

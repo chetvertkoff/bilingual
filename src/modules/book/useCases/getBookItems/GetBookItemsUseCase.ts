@@ -1,9 +1,9 @@
-import { UseCase } from '../../../../core/domain/UseCase'
+import { UseCase } from '../../../../shared/domain/UseCase'
 import { IBookRepo } from '../../repos/BookRepo'
 import { GetBilingualItemsError } from './GetBookItemsError'
-import { Result } from '../../../../core'
+import { Result } from '../../../../shared'
 import { BookDomain } from '../../domain'
-import { BaseParams, BaseResponseCatalog } from '../../../../core/infra'
+import { BaseParams, BaseResponseCatalog } from '../../../../shared/infra'
 
 interface Props {
 	userId: string

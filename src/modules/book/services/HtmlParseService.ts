@@ -1,5 +1,5 @@
 import { JSDOM } from 'jsdom'
-import { Result } from '../../../core/helpers/Result'
+import { Result } from '../../../shared/helpers/Result'
 import { BookReaderResult, BookReaderResultDTO } from './BookReaderService'
 
 export interface ParsedChapterDTO {

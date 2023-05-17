@@ -1,5 +1,5 @@
-import { BaseDomain } from '../../../core/domain/BaseDomain'
-import { BaseDomainProps } from '../../../core/domain/BaseDomainProps'
+import { BaseDomain } from '../../../shared/domain/BaseDomain'
+import { BaseDomainProps } from '../../../shared/domain/BaseDomainProps'
 import { ParagraphDomain } from './ParagraphDomain'
 
 interface Props extends BaseDomainProps {

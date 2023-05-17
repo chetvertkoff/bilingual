@@ -1,4 +1,4 @@
-import { BaseController } from '../../../../core/infra/BaseController'
+import { BaseController } from '../../../../shared/infra/BaseController'
 import { ITranslateService } from '../../services/TranslateService'
 
 export class GetTranslateController extends BaseController {

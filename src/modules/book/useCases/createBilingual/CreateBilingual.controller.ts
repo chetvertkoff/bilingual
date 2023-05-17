@@ -1,5 +1,5 @@
 import { CreateBilingualUseCase } from './CreateBilingualUseCase'
-import { BaseController } from '../../../../core/infra/BaseController'
+import { BaseController } from '../../../../shared/infra/BaseController'
 import { v4 as uuidv4 } from 'uuid'
 import path from 'path'
 

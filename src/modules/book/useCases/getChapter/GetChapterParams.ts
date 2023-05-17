@@ -1,4 +1,4 @@
-import { BaseParams, BaseParamsProps } from '../../../../core/infra/BaseParams'
+import { BaseParams, BaseParamsProps } from '../../../../shared/infra/BaseParams'
 
 export interface GetChapterParamsProps extends BaseParamsProps {
 	book_id?: string

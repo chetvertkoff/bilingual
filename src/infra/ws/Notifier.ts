@@ -1,8 +1,8 @@
 import { WebSocket } from 'ws'
 import { IncomingMessage } from 'http'
-import { Callback, Result, UseCaseError } from '../../core'
-import { WsResponse } from '../../core/infra'
-import { WsEvents } from '../../core/constants'
+import { Callback, Result, UseCaseError } from '../../shared'
+import { WsResponse } from '../../shared/infra'
+import { WsEvents } from '../../shared/constants'
 
 type Params = Record<string, string> & {
 	userId: string

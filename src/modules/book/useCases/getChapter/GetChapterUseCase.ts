@@ -1,8 +1,8 @@
-import { UseCase } from '../../../../core/domain/UseCase'
+import { UseCase } from '../../../../shared/domain/UseCase'
 import { GetChapterParams } from './GetChapterParams'
 import { IChapterRepo } from '../../repos/ChapterRepo'
 import { GetChapterError } from './GetChapterError'
-import { Result } from '../../../../core'
+import { Result } from '../../../../shared'
 import { GetChapterResponse } from './GetChapterResponse'
 
 interface Props {

@@ -1,6 +1,6 @@
 import { EPub } from 'epub2'
 import { BookReaderResult, BookReaderResultDTO, IBookReaderService } from './BookReaderService'
-import { Result } from '../../../core/helpers/Result'
+import { Result } from '../../../shared/helpers/Result'
 
 export class BookReaderEpubService implements IBookReaderService {
 	public async execute(bookPath: string): Promise<Result<BookReaderResult>> {

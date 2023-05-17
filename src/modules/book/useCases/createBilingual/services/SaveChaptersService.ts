@@ -2,7 +2,7 @@ import { IBookRepo } from '../../../repos/BookRepo'
 import { IChapterRepo } from '../../../repos/ChapterRepo'
 import { IParagraphRepo } from '../../../repos/ParagraphRepo'
 import { BookDomain, ChapterDomain } from '../../../domain'
-import { Result } from '../../../../../core'
+import { Result } from '../../../../../shared'
 import { IUserRepo } from '../../../repos/UserRepo'
 import { BookMap, ChapterMap, UserMap } from '../../../mappers'
 

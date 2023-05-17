@@ -1,8 +1,8 @@
-import { UseCase } from '../../../../core/domain/UseCase'
+import { UseCase } from '../../../../shared/domain/UseCase'
 import { IParagraphRepo } from '../../repos/ParagraphRepo'
 import { GetParagraphError } from './GetParagraphError'
 import { GetParagraphParams } from './GetParagraphParams'
-import { Result } from '../../../../core'
+import { Result } from '../../../../shared'
 import { GetParagraphResponse } from './GetParagraphResponse'
 
 interface Props {

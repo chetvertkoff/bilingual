@@ -1,5 +1,5 @@
 import { EntityManager } from 'typeorm'
-import { Result } from '../../../core'
+import { Result } from '../../../shared'
 import { GetChapterParams } from '../useCases/getChapter/GetChapterParams'
 import { Chapter } from '../../../infra/db/entity/Chapter'
 import { Book } from '../../../infra/db/entity/Book'

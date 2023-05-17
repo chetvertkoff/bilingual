@@ -4,7 +4,7 @@ import { bookReaderService, htmlParseService, translateService } from '../../ser
 import * as DTO from './CreateBilingualDTO'
 import { notify } from '../../../../infra/ws'
 import { saveChaptersService } from './services'
-import { observer } from '../../../../core/infra'
+import { observer } from '../../../../shared/infra'
 import { bookRepo, userRepo } from '../../repos'
 
 const createBilingualUseCase = new CreateBilingualUseCase(

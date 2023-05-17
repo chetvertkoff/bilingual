@@ -1,5 +1,5 @@
 import { BookReaderEpubService } from './BookReaderEpubService'
-import { Result } from '../../../core/helpers/Result'
+import { Result } from '../../../shared/helpers/Result'
 import { unlink } from 'fs/promises'
 
 export interface BookReaderResultDTO {

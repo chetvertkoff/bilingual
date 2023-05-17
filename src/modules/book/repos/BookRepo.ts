@@ -2,9 +2,9 @@ import { EntityManager } from 'typeorm'
 import { Users } from '../../../infra/db/entity/Users'
 import { Book } from '../../../infra/db/entity/Book'
 import { BookMap } from '../mappers/BookMap'
-import { Result } from '../../../core/helpers/Result'
+import { Result } from '../../../shared/helpers/Result'
 import { BookDomain } from '../domain'
-import { BaseParams, BaseRepo, IBaseRepo } from '../../../core/infra'
+import { BaseParams, BaseRepo, IBaseRepo } from '../../../shared/infra'
 
 export interface IBookRepo extends IBaseRepo {
 	saveCommand(book: BookDomain, user: Users): Promise<Result>

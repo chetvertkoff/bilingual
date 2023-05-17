@@ -1,7 +1,7 @@
-import { UseCase } from '../../../../core/domain/UseCase'
+import { UseCase } from '../../../../shared/domain/UseCase'
 import { IBookRepo } from '../../repos/BookRepo'
 import { GetBilingualError } from './GetBookError'
-import { Result } from '../../../../core'
+import { Result } from '../../../../shared'
 import { BookDomain } from '../../domain'
 
 interface Props {

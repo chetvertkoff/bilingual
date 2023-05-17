@@ -1,4 +1,4 @@
-import { BaseParams } from '../../../core/infra/BaseParams'
+import { BaseParams } from '../../../shared/infra/BaseParams'
 
 export interface GetParagraphParams extends BaseParams {
 	chapter_id?: number

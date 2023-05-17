@@ -1,9 +1,9 @@
 import { HtmlParserResultDTO, ParsedChapterDTO } from './HtmlParseService'
-import { Result } from '../../../core/helpers/Result'
+import { Result } from '../../../shared/helpers/Result'
 import axios from 'axios'
 import { JSDOM } from 'jsdom'
 import { ChapterDomain, ParagraphDomain } from '../domain'
-import { IObserver } from '../../../core/infra'
+import { IObserver } from '../../../shared/infra'
 
 export interface ITranslateService {
 	execute(eventId: string, book: HtmlParserResultDTO[]): Promise<Result<ChapterDomain[]>>

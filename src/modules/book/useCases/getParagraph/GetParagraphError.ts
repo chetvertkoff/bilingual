@@ -1,4 +1,4 @@
-import { Result, UseCaseError } from '../../../../core'
+import { Result, UseCaseError } from '../../../../shared'
 
 export namespace GetParagraphError {
 	export class ParagraphQueryError extends Result<UseCaseError> {

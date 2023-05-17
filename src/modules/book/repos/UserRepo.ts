@@ -1,5 +1,5 @@
 import { EntityManager } from 'typeorm'
-import { Result } from '../../../core'
+import { Result } from '../../../shared'
 import { Users } from '../../../infra'
 import { UserDomain } from '../domain'
 import { UserMap } from '../mappers'

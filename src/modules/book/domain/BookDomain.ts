@@ -1,5 +1,5 @@
-import { BaseDomain } from '../../../core'
-import { BaseDomainProps } from '../../../core/domain/BaseDomainProps'
+import { BaseDomain } from '../../../shared'
+import { BaseDomainProps } from '../../../shared/domain/BaseDomainProps'
 
 interface BookProps extends BaseDomainProps {
 	progress?: number

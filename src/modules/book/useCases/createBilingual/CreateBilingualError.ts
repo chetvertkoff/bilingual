@@ -1,5 +1,5 @@
-import { Result } from '../../../../core/helpers/Result'
-import { UseCaseError } from '../../../../core/helpers/UseCaseError'
+import { Result } from '../../../../shared/helpers/Result'
+import { UseCaseError } from '../../../../shared/helpers/UseCaseError'
 
 export namespace CreateBilingualError {
 	export class BookParseError extends Result<UseCaseError> {

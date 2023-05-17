@@ -1,4 +1,4 @@
-import { BaseResponseCatalog } from '../../../../core/infra/BaseResponseCatalog'
+import { BaseResponseCatalog } from '../../../../shared/infra/BaseResponseCatalog'
 import { ParagraphDomain } from '../../domain'
 
 export class GetParagraphResponse extends BaseResponseCatalog<ParagraphDomain> {

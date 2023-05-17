@@ -1,4 +1,4 @@
-import { BaseController } from '../../../../core/infra/BaseController'
+import { BaseController } from '../../../../shared/infra/BaseController'
 import { GetParagraphUseCase } from './GetParagraphUseCase'
 import { GetParagraphParams } from './GetParagraphParams'
 

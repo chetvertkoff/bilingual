@@ -1,4 +1,4 @@
-import { Result, UseCaseError } from '../../../../core'
+import { Result, UseCaseError } from '../../../../shared'
 
 export namespace GetChapterError {
 	export class ChapterQueryError extends Result<UseCaseError> {

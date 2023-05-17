@@ -1,6 +1,6 @@
-import { BaseController } from '../../../../core/infra/BaseController'
+import { BaseController } from '../../../../shared/infra/BaseController'
 import { GetBookItemsUseCase } from './GetBookItemsUseCase'
-import { BaseParams } from '../../../../core/infra'
+import { BaseParams } from '../../../../shared/infra'
 
 export class GetBookItemsController extends BaseController {
 	constructor(private getBookItemsUseCase: GetBookItemsUseCase) {

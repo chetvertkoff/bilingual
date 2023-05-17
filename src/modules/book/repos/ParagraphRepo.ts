@@ -1,6 +1,6 @@
 import { EntityManager } from 'typeorm'
 import { Paragraph } from '../../../infra/db/entity/Paragraph'
-import { Result } from '../../../core'
+import { Result } from '../../../shared'
 import { GetParagraphParams } from '../useCases/getParagraph/GetParagraphParams'
 import { ParagraphDomain } from '../domain'
 import { ParagraphMap } from '../mappers'
