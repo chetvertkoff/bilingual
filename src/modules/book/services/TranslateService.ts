@@ -3,7 +3,7 @@ import { Result } from '../../../shared/helpers/Result'
 import axios from 'axios'
 import { JSDOM } from 'jsdom'
 import { ChapterDomain, ParagraphDomain } from '../domain'
-import { IObserver } from '../../../shared/infra'
+import { IMediator } from '../../../shared/infra'
 
 export interface ITranslateService {
 	execute(eventId: string, book: HtmlParserResultDTO[]): Promise<Result<ChapterDomain[]>>
@@ -11,7 +11,7 @@ export interface ITranslateService {
 }
 
 export class TranslateService implements ITranslateService {
-	constructor(private observer: IObserver) {}
+	constructor(private mediator: IMediator) {}
 
 	public async execute(eventId: string, book: HtmlParserResultDTO[]): Promise<Result<ChapterDomain[]>> {
 		try {
@@ -35,7 +35,7 @@ export class TranslateService implements ITranslateService {
 			// console.log(i, ' of ', book.length)
 			const paragraphs = await this.translateChapter(ch.chapter, i, book.length)
 			res.push(new ChapterDomain({ name: ch.name, paragraphs }))
-			this.observer.dispatch(onChapterTranslateEventId, { chapterIndex: i, chapterCount: book.length })
+			this.mediator.dispatch(onChapterTranslateEventId, { chapterIndex: i, chapterCount: book.length })
 		}
 		return res
 	}

@@ -5,10 +5,10 @@ import { UseCase } from '../../../../shared/domain/UseCase'
 import { CreateBilingualError } from './CreateBilingualError'
 import { Result } from '../../../../shared/helpers/Result'
 import { Notifier } from '../../../../infra/ws/Notifier'
-import { IObserver, WsResponse } from '../../../../shared/infra'
+import { IMediator, WsResponse } from '../../../../shared/infra'
 import { WsEvents } from '../../../../shared/constants'
 import { ISaveChaptersService } from './services/SaveChaptersService'
-import { CreateBilingualObserverEvents } from './constants'
+import { CreateBilingualEvents } from './constants'
 import { BookDomain, ChapterDomain, UserDomain } from '../../domain'
 import { IBookRepo } from '../../repos/BookRepo'
 import { UserMap } from '../../mappers'
@@ -43,13 +43,13 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 		private translater: ITranslateService,
 		private notify: Notifier,
 		private saveChaptersService: ISaveChaptersService,
-		private observer: IObserver,
+		private mediator: IMediator,
 		private bookRepo: IBookRepo,
 		private userRepo: IUserRepo
 	) {}
 
 	public async execute({ userId, bookPath }: Props) {
-		const eventId = `${CreateBilingualObserverEvents.CHAPTER_TRANSLATE_PROGRESS}${uuidv4()}`
+		const eventId = `${CreateBilingualEvents.CHAPTER_TRANSLATE_PROGRESS}${uuidv4()}`
 		try {
 			const createBookProps = await this.createBook({ userId, bookPath, eventId })
 			const parseBookProps = await this.parseBook(createBookProps)
@@ -58,7 +58,7 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 		} catch (e) {
 			this.notify.send(userId, Result.fail(new Error()))
 		} finally {
-			this.observer.unsubscribe(eventId)
+			this.mediator.unsubscribe(eventId)
 		}
 	}
 
@@ -108,7 +108,7 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 			return
 		}
 
-		this.observer.subscribe(eventId, ({ chapterIndex, chapterCount }) => {
+		this.mediator.subscribe(eventId, ({ chapterIndex, chapterCount }) => {
 			const a = chapterIndex + 1
 			const b = chapterCount
 			const percent = Math.trunc((a / b) * 90)
@@ -119,8 +119,7 @@ export class CreateBilingualUseCase implements UseCase<Props, Promise<void>> {
 
 			this.bookRepo.saveCommand(BookDomain.create({ ...bookRes.value, progress: percent }), UserMap.toDb(user))
 		})
-		// @ts-ignore
-		console.log(this.observer.subscribers)
+
 		const translatedChapters = await this.translater.execute(eventId, parsedBook.value)
 
 		if (!translatedChapters.success) {

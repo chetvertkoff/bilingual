@@ -1,12 +1,12 @@
 import { Callback } from '../types'
 
-export interface IObserver {
+export interface IMediator {
 	subscribe(eventId: string, callback: Callback)
 	unsubscribe(eventId: string)
 	dispatch(eventId: string, payload: Record<string, any>)
 }
 
-class Observer {
+class Mediator {
 	subscribers: Map<string, Callback> = new Map()
 
 	public subscribe(eventId: string, callback: Callback) {
@@ -26,4 +26,4 @@ class Observer {
 	}
 }
 
-export const observer = new Observer()
+export const mediator = new Mediator()
